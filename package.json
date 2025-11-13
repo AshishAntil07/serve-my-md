@@ -1,4 +1,23 @@
 {
   "name": "serve-my-md",
-  "packageManager": "yarn@4.11.0"
+  "version": "1.0.0",
+  "description": "A utility to create a static build for your markdown files",
+  "main": "index.ts",
+  "bin": {
+    "serve-my-md": "./bin/index.js"
+  },
+  "repository": "https://github.com/AshishAntil07/serve-my-md",
+  "author": "AshishAntil07 <ashishantil.antil07@gmail.com>",
+  "license": "MIT",
+  "packageManager": "yarn@4.11.0",
+  "private": true,
+  "volta": {
+    "node": "24.11.1",
+    "yarn": "4.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  }
 }
