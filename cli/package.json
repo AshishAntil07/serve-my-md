@@ -1,11 +1,9 @@
 {
   "name": "serve-my-md",
   "version": "1.0.0",
+  "type": "module",
   "description": "A utility to create a static build for your markdown files",
-  "main": "index.ts",
-  "bin": {
-    "serve-my-md": "./bin/index.js"
-  },
+  "bin": "./bin/index.js",
   "repository": "https://github.com/AshishAntil07/serve-my-md",
   "author": "AshishAntil07 <ashishantil.antil07@gmail.com>",
   "license": "MIT",
