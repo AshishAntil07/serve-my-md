@@ -2,8 +2,8 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    // "rootDir": "./src",
-    "outDir": "./bin",
+    "rootDir": "./src",
+    "outDir": "./out",
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
@@ -15,9 +15,9 @@
     // and npm install -D @types/node
 
     // Other Outputs
-    "sourceMap": true,
+    // "sourceMap": true,
     "declaration": true,
-    "declarationMap": true,
+    // "declarationMap": true,
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
@@ -39,5 +39,11 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
+
+    // Module Resolution
+    "moduleResolution": "nodenext",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
   }
 }

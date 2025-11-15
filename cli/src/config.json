@@ -1,0 +1,5 @@
+{
+  "name": "serve-my-md",
+  "version": "1.0.0",
+  "description": "A CLI tool to create a ready-to-serve static website from markdown files"
+}
