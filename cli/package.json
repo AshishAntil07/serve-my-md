@@ -27,6 +27,7 @@
     "@inquirer/prompts": "^7.10.1",
     "commander": "^14.0.2",
     "markdown-it": "^14.1.0",
+    "minimatch": "^10.1.1",
     "prismjs": "^1.30.0"
   }
 }

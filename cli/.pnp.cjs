@@ -34,6 +34,7 @@ const RAW_RUNTIME_STATE =
           ["@types/prismjs", "npm:1.26.5"],\
           ["commander", "npm:14.0.2"],\
           ["markdown-it", "npm:14.1.0"],\
+          ["minimatch", "npm:10.1.1"],\
           ["prettier", "npm:3.6.2"],\
           ["prismjs", "npm:1.30.0"],\
           ["serve-my-md", "workspace:."],\
@@ -392,6 +393,25 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@isaacs/balanced-match", [\
+      ["npm:4.0.1", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/@isaacs-balanced-match-npm-4.0.1-8965afafe6-10c0.zip/node_modules/@isaacs/balanced-match/",\
+        "packageDependencies": [\
+          ["@isaacs/balanced-match", "npm:4.0.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["@isaacs/brace-expansion", [\
+      ["npm:5.0.0", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/@isaacs-brace-expansion-npm-5.0.0-754d3cb3f5-10c0.zip/node_modules/@isaacs/brace-expansion/",\
+        "packageDependencies": [\
+          ["@isaacs/balanced-match", "npm:4.0.1"],\
+          ["@isaacs/brace-expansion", "npm:5.0.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@types/linkify-it", [\
       ["npm:5.0.0", {\
         "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/@types-linkify-it-npm-5.0.0-576a16b976-10c0.zip/node_modules/@types/linkify-it/",\
@@ -585,6 +605,16 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["minimatch", [\
+      ["npm:10.1.1", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/minimatch-npm-10.1.1-453db4ee1a-10c0.zip/node_modules/minimatch/",\
+        "packageDependencies": [\
+          ["@isaacs/brace-expansion", "npm:5.0.0"],\
+          ["minimatch", "npm:10.1.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["mute-stream", [\
       ["npm:2.0.0", {\
         "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/mute-stream-npm-2.0.0-45d3c1ef83-10c0.zip/node_modules/mute-stream/",\
@@ -640,6 +670,7 @@ const RAW_RUNTIME_STATE =
           ["@types/prismjs", "npm:1.26.5"],\
           ["commander", "npm:14.0.2"],\
           ["markdown-it", "npm:14.1.0"],\
+          ["minimatch", "npm:10.1.1"],\
           ["prettier", "npm:3.6.2"],\
           ["prismjs", "npm:1.30.0"],\
           ["serve-my-md", "workspace:."],\
