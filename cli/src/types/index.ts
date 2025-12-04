@@ -12,6 +12,18 @@ export interface SmmConfig {
   name?: string;
   showNameWithLogo?: boolean;
   og?: OpenGraph;
+  sortRoutes?: boolean;
+  trimIndex?: boolean;
+  fonts?: {
+    title?: {
+      name: string;
+      url: string;
+    };
+    body: {
+      name: string;
+      url: string;
+    };
+  };
 }
 
 export interface Out {
@@ -21,6 +33,10 @@ export interface Out {
   defaultTheme: string;
   favicon?: string;
   name: string;
+  fonts?: {
+    title?: string;
+    body: string;
+  };
   showNameWithLogo: boolean;
   routes: Route[];
 }

@@ -30,10 +30,14 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@inquirer/prompts", "virtual:7ba83702d85d71dc67b0a5c51b64fad1098d3961169fcaa92b6e01cc8895fb7c1e389f4a5600cb6491f9ca88675e1a4fe61322c5bc13a7a37a6134519c669b09#npm:7.10.1"],\
           ["@types/markdown-it", "npm:14.1.2"],\
+          ["@types/markdown-it-footnote", "npm:3.0.4"],\
           ["@types/node", "npm:24.10.1"],\
           ["@types/prismjs", "npm:1.26.5"],\
           ["commander", "npm:14.0.2"],\
           ["markdown-it", "npm:14.1.0"],\
+          ["markdown-it-footnote", "npm:4.0.0"],\
+          ["markdown-it-github-headings", "npm:2.0.1"],\
+          ["markdown-it-task-lists", "npm:2.1.1"],\
           ["minimatch", "npm:10.1.1"],\
           ["prettier", "npm:3.6.2"],\
           ["prismjs", "npm:1.30.0"],\
@@ -432,6 +436,16 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@types/markdown-it-footnote", [\
+      ["npm:3.0.4", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/@types-markdown-it-footnote-npm-3.0.4-53324b1af4-10c0.zip/node_modules/@types/markdown-it-footnote/",\
+        "packageDependencies": [\
+          ["@types/markdown-it", "npm:14.1.2"],\
+          ["@types/markdown-it-footnote", "npm:3.0.4"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@types/mdurl", [\
       ["npm:2.0.0", {\
         "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/@types-mdurl-npm-2.0.0-2f4116c0b0-10c0.zip/node_modules/@types/mdurl/",\
@@ -552,12 +566,40 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["github-slugger", [\
+      ["npm:1.5.0", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/github-slugger-npm-1.5.0-8a3622aa03-10c0.zip/node_modules/github-slugger/",\
+        "packageDependencies": [\
+          ["github-slugger", "npm:1.5.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["html-entities", [\
+      ["npm:1.4.0", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/html-entities-npm-1.4.0-39a1121015-10c0.zip/node_modules/html-entities/",\
+        "packageDependencies": [\
+          ["html-entities", "npm:1.4.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["iconv-lite", [\
       ["npm:0.7.0", {\
         "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/iconv-lite-npm-0.7.0-89105876e3-10c0.zip/node_modules/iconv-lite/",\
         "packageDependencies": [\
           ["iconv-lite", "npm:0.7.0"],\
           ["safer-buffer", "npm:2.1.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["innertext", [\
+      ["npm:1.0.3", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/innertext-npm-1.0.3-c4099dbf5a-10c0.zip/node_modules/innertext/",\
+        "packageDependencies": [\
+          ["html-entities", "npm:1.4.0"],\
+          ["innertext", "npm:1.0.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -592,6 +634,35 @@ const RAW_RUNTIME_STATE =
           ["mdurl", "npm:2.0.0"],\
           ["punycode.js", "npm:2.3.1"],\
           ["uc.micro", "npm:2.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["markdown-it-footnote", [\
+      ["npm:4.0.0", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/markdown-it-footnote-npm-4.0.0-61bb9cac15-10c0.zip/node_modules/markdown-it-footnote/",\
+        "packageDependencies": [\
+          ["markdown-it-footnote", "npm:4.0.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["markdown-it-github-headings", [\
+      ["npm:2.0.1", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/markdown-it-github-headings-npm-2.0.1-087b17ce18-10c0.zip/node_modules/markdown-it-github-headings/",\
+        "packageDependencies": [\
+          ["github-slugger", "npm:1.5.0"],\
+          ["innertext", "npm:1.0.3"],\
+          ["markdown-it-github-headings", "npm:2.0.1"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["markdown-it-task-lists", [\
+      ["npm:2.1.1", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/markdown-it-task-lists-npm-2.1.1-8c6fecea93-10c0.zip/node_modules/markdown-it-task-lists/",\
+        "packageDependencies": [\
+          ["markdown-it-task-lists", "npm:2.1.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -666,10 +737,14 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@inquirer/prompts", "virtual:7ba83702d85d71dc67b0a5c51b64fad1098d3961169fcaa92b6e01cc8895fb7c1e389f4a5600cb6491f9ca88675e1a4fe61322c5bc13a7a37a6134519c669b09#npm:7.10.1"],\
           ["@types/markdown-it", "npm:14.1.2"],\
+          ["@types/markdown-it-footnote", "npm:3.0.4"],\
           ["@types/node", "npm:24.10.1"],\
           ["@types/prismjs", "npm:1.26.5"],\
           ["commander", "npm:14.0.2"],\
           ["markdown-it", "npm:14.1.0"],\
+          ["markdown-it-footnote", "npm:4.0.0"],\
+          ["markdown-it-github-headings", "npm:2.0.1"],\
+          ["markdown-it-task-lists", "npm:2.1.1"],\
           ["minimatch", "npm:10.1.1"],\
           ["prettier", "npm:3.6.2"],\
           ["prismjs", "npm:1.30.0"],\

@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { mdParser } from "../index.js";
+import { finalConfig, mdParser } from "../index.js";
 import { options } from "../lib/commander.js";
 import type { NestedPair } from "../types/index.js";
 import type { OpenGraph } from "../types/og.js";
@@ -32,12 +32,32 @@ export async function getMarkdownFiles(
     }
   }
 
-  const results = await Promise.all(promises);
-  return results.flat();
+  if (finalConfig.sortRoutes)
+    if (pairChildren) pairChildren.sort((a, b) => a[0].localeCompare(b[0]));
+    else nestedPaths.sort((a, b) => a[0].localeCompare(b[0]));
+
+  return finalConfig.trimIndex
+    ? (await Promise.all(promises)).flat().map(trimIndexFromPath)
+    : (await Promise.all(promises)).flat();
+}
+
+const indexTokens = "1234567890.";
+
+export function trimIndexFromPath(filePath: string): string {
+  let offset = filePath.lastIndexOf("/") + 1;
+  while (offset < filePath.length && indexTokens.includes(filePath[offset]!))
+    offset++;
+
+  return (
+    filePath.slice(0, filePath.lastIndexOf("/") + 1) + filePath.slice(offset)
+  );
 }
 
 export function cleanNestedPaths(np: typeof nestedPaths = nestedPaths) {
   for (const pair of np) {
+    if (finalConfig.trimIndex) {
+      pair[0] = trimIndexFromPath(pair[0]);
+    }
     if (pair[1]) {
       cleanNestedPaths(pair[1]);
       if (pair[1]?.length === 1 && pair[1]?.[0]?.[0] === "") {
@@ -59,7 +79,9 @@ export function getPath(filepath: string): string {
   );
 }
 
-export async function FileOrDirectoryExists(filepath: string): Promise<boolean> {
+export async function FileOrDirectoryExists(
+  filepath: string,
+): Promise<boolean> {
   try {
     await fs.access(filepath);
     return true;
@@ -94,12 +116,14 @@ export function ogToHtml(og: OpenGraph): string {
     }
   }
 
-  [...og.images ?? [], ...og.videos ?? [], ...og.audios ?? []].forEach(img => {
-    Object.entries(img).forEach(([k, v]) => {
-      if (v == null) return;
-      tags.push(`<meta property="og:${k}" content="${v}">`);
-    });
-  });
+  [...(og.images ?? []), ...(og.videos ?? []), ...(og.audios ?? [])].forEach(
+    (img) => {
+      Object.entries(img).forEach(([k, v]) => {
+        if (v == null) return;
+        tags.push(`<meta property="og:${k}" content="${v}">`);
+      });
+    },
+  );
 
   return tags.join("\n");
 }

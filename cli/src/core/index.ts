@@ -12,10 +12,9 @@ export async function readConfig(filepath: string): Promise<object> {
 
     return data;
   } catch (err) {
-    // throw new Error(`Failed to read config file at ${filepath}: ${err}`);
     logger.log(
       `No config file found at ${filepath}, proceeding with defaults.`,
-      "info"
+      "info",
     );
     return {};
   }
@@ -65,11 +64,28 @@ export async function parseSmmIgnore(filePath: string) {
 
 export async function generateHtml() {
   try {
-    const htmlTemplate = await fs.readFile(path.join(import.meta.dirname, '..', '..', 'index.html'), 'utf-8');
+    const htmlTemplate = await fs.readFile(
+      path.join(import.meta.dirname, "..", "..", "index.html"),
+      "utf-8",
+    );
 
-    return htmlTemplate.replace("{{og}}", ogToHtml(finalConfig.og ?? {})).replace("{{title}}", finalConfig.rootTitle ?? "Serve My MD").replace("{{description}}", finalConfig.description ?? "").replace("{{favicon}}", finalConfig.favicon ?? "");
+    return htmlTemplate
+      .replace("{{og}}", ogToHtml(finalConfig.og ?? {}))
+      .replace("{{title}}", finalConfig.rootTitle ?? "Serve My MD")
+      .replace("{{description}}", finalConfig.description ?? "")
+      .replace("{{favicon}}", finalConfig.favicon ?? "")
+      .replace(
+        "{{fonts}}",
+        finalConfig.fonts
+          ? (finalConfig.fonts.title
+              ? `<link rel="preconnect" href="${finalConfig.fonts.title.url}" />`
+              : "") +
+              (finalConfig.fonts.body
+                ? `<link rel="preconnect" href="${finalConfig.fonts.body.url}" />`
+                : "")
+          : "",
+      );
   } catch (err) {
     throw new Error(`Failed to generate HTML: ${err}`);
   }
 }
-

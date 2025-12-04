@@ -15,11 +15,13 @@ import { writeFile } from "fs/promises";
 import { logger } from "./lib/index.js";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
-import MarkdownIt from "markdown-it";
+import MarkdownIt, { type PluginSimple } from "markdown-it";
 import Prism from "prismjs";
 import defaultSmmConfig from "./smm.config.json" with { type: "json" };
 import { readConfig } from "./core/index.js";
 import path from "path";
+import MarkdownItFootNote from "markdown-it-footnote";
+import MarkdownItTasks from "markdown-it-task-lists";
 
 await ask();
 
@@ -34,12 +36,16 @@ export const finalConfig: SmmConfig = {
 
 const md = new MarkdownIt({
   ...finalConfig.markdownItOptions,
-  highlight: function (str, lang) {
-    if (lang && Prism.languages[lang])
-      return Prism.highlight(str, Prism.languages[lang], lang);
-    return "";
+  highlight: function (str, lang): string {
+    if (lang && Prism.languages[lang]) {
+      const highlighted = Prism.highlight(str, Prism.languages[lang], lang);
+      return `<pre class="language-${lang}"><code class="language-${lang}">${highlighted}</code></pre>`;
+    }
+
+    return `<pre class="language-plaintext"><code>${md.utils.escapeHtml(str)}</code></pre>`;
   },
-});
+}).use(MarkdownItFootNote).use(MarkdownItTasks);
+
 
 md.linkify.set({ fuzzyEmail: false });
 
