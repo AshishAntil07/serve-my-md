@@ -1,2 +1,4 @@
 /.yarn/unplugged
 /out
+/bin
+/dist

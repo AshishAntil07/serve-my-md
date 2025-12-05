@@ -1,0 +1,33 @@
+{
+  "slugify": [
+    {
+      "input": "What does \"HHH\" mean?",
+      "output": "what-does-hhh-mean"
+    },
+    {
+      "input": "/hello/1. Hula Hoops!",
+      "output": "hello1-hula-hoops"
+    }
+  ],
+  "trimIndexFromPath": [
+    {
+      "input": "/hello/1. How're you",
+      "output": "/hello/How're you"
+    },
+    {
+      "input": "/world/ 4. 69 ways to say hello",
+      "output": "/world/69 ways to say hello"
+    }
+  ],
+  "ogToHtml": [
+    {
+      "input": {
+        "title": "Test Title",
+        "description": "Test Description",
+        "image": "http://example.com/image.jpg",
+        "url": "http://example.com"
+      },
+      "output": "<meta property=\"og:title\" content=\"Test Title\">\n<meta property=\"og:description\" content=\"Test Description\">\n<meta property=\"og:image\" content=\"http://example.com/image.jpg\">\n<meta property=\"og:url\" content=\"http://example.com\">"
+    }
+  ]
+}

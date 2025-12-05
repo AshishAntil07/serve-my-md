@@ -10,7 +10,10 @@
   "packageManager": "yarn@4.11.0",
   "private": true,
   "scripts": {
-    "dev": "tsc && node ./out/index.js"
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "test": "vitest",
+    "start": "node ./bin/index.js"
   },
   "volta": {
     "node": "24.11.1",
@@ -22,7 +25,9 @@
     "@types/node": "^24.10.1",
     "@types/prismjs": "^1",
     "prettier": "^3.6.2",
-    "typescript": "^5.9.3"
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.10.1",

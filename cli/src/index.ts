@@ -1,24 +1,24 @@
-import ask from "./lib/inquire.js";
-import { parseSmmIgnore } from "./core/index.js";
-import config from "./config.json" with { type: "json" };
+import ask from "@/lib/inquire.js";
 import {
   cleanNestedPaths,
-  FileOrDirectoryExists,
   getMarkdownFiles,
   nestedPaths,
   parseMD,
-} from "./utils/index.js";
-import { generateHtml } from "./core/index.js";
-import { options } from "./lib/commander.js";
-import type { Out, Route, SmmConfig } from "./types/index.js";
+  parseSmmIgnore,
+} from "@/core/index.js";
+import config from "@/config.json" with { type: "json" };
+import { FileOrDirectoryExists } from "@/utils/index.js";
+import { generateHtml } from "@/core/index.js";
+import { options } from "@/lib/commander.js";
+import type { Out, Route, SmmConfig } from "@/types/index.js";
 import { writeFile } from "fs/promises";
-import { logger } from "./lib/index.js";
+import { logger } from "@/lib/index.js";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
-import MarkdownIt, { type PluginSimple } from "markdown-it";
+import MarkdownIt from "markdown-it";
 import Prism from "prismjs";
-import defaultSmmConfig from "./smm.config.json" with { type: "json" };
-import { readConfig } from "./core/index.js";
+import defaultSmmConfig from "@/smm.config.json" with { type: "json" };
+import { readConfig } from "@/core/index.js";
 import path from "path";
 import MarkdownItFootNote from "markdown-it-footnote";
 import MarkdownItTasks from "markdown-it-task-lists";
@@ -44,8 +44,9 @@ const md = new MarkdownIt({
 
     return `<pre class="language-plaintext"><code>${md.utils.escapeHtml(str)}</code></pre>`;
   },
-}).use(MarkdownItFootNote).use(MarkdownItTasks);
-
+})
+  .use(MarkdownItFootNote)
+  .use(MarkdownItTasks);
 
 md.linkify.set({ fuzzyEmail: false });
 
@@ -68,6 +69,10 @@ const out: Out = {
   name: finalConfig.name ?? "Serve My MD",
   showNameWithLogo: finalConfig.showNameWithLogo ?? false,
   routes: await Promise.all(parsePromises),
+  fonts: {
+    title: finalConfig.fonts?.title?.name || "serif",
+    body: finalConfig.fonts?.body.name || "sans-serif",
+  },
   ...(finalConfig.favicon ? { favicon: finalConfig.favicon } : {}),
 };
 out.routes.forEach((o) => {

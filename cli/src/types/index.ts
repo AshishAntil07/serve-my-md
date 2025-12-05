@@ -17,11 +17,11 @@ export interface SmmConfig {
   fonts?: {
     title?: {
       name: string;
-      url: string;
+      url?: string;
     };
     body: {
       name: string;
-      url: string;
+      url?: string;
     };
   };
 }
