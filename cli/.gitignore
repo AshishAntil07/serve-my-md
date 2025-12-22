@@ -1,4 +1,5 @@
 /.yarn/unplugged
-/out
 /bin
-/dist
+
+/tests/fixtures/md/*/dist
+/tests/fixtures/md/*/.ss

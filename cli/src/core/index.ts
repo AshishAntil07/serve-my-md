@@ -4,7 +4,7 @@ import type { IgnoreRule, NestedPair } from "@/types/index.js";
 import path from "path";
 import { minimatch } from "minimatch";
 import { finalConfig, mdParser, shouldIgnore } from "@/index.js";
-import { ogToHtml, slugify, trimIndexFromPath } from "@/utils/index.js";
+import { cleanName, ogToHtml, slugify, trimIndexFromPath } from "@/utils/index.js";
 import { options } from "@/lib/commander.js";
 
 export async function readConfig(filepath: string): Promise<object> {
@@ -19,41 +19,6 @@ export async function readConfig(filepath: string): Promise<object> {
     );
     return {};
   }
-}
-
-export const nestedPaths: NestedPair<string>[] = [];
-
-export async function getMarkdownFiles(
-  baseUrl: string,
-  pairChildren?: NestedPair<string>[],
-): Promise<string[]> {
-  const files = await fs.readdir(baseUrl, { withFileTypes: true });
-
-  const promises = [];
-  for (const file of files) {
-    const filePath = path.join(baseUrl, file.name);
-    if (shouldIgnore(filePath.slice(options.directory.length))) continue;
-    if (file.isDirectory()) {
-      const dirPair: NestedPair<string> = [getPath(file.name), []];
-      if (pairChildren) pairChildren.push(dirPair);
-      else nestedPaths.push(dirPair);
-      promises.push(
-        getMarkdownFiles(filePath, dirPair[1] as NestedPair<string>[]),
-      );
-    } else if (file.name.endsWith(".md")) {
-      if (pairChildren) pairChildren.push([getPath(file.name), null]);
-      else nestedPaths.push([getPath(filePath), null]);
-      promises.push(Promise.resolve([filePath]));
-    }
-  }
-
-  if (finalConfig.sortRoutes)
-    if (pairChildren) pairChildren.sort((a, b) => a[0].localeCompare(b[0]));
-    else nestedPaths.sort((a, b) => a[0].localeCompare(b[0]));
-
-  return finalConfig.trimIndex
-    ? (await Promise.all(promises)).flat().map(trimIndexFromPath)
-    : (await Promise.all(promises)).flat();
 }
 
 export async function parseSmmIgnore(filePath: string) {
@@ -96,6 +61,40 @@ export async function parseSmmIgnore(filePath: string) {
       shouldIgnore: (_: string) => false,
     };
   }
+}
+
+export const nestedPaths: NestedPair<string>[] = [];
+
+export async function getMarkdownFiles(
+  baseUrl: string,
+  pairChildren?: NestedPair<string>[],
+): Promise<string[]> {
+  const files = await fs.readdir(baseUrl, { withFileTypes: true });
+
+  const promises = [];
+  for (const file of files) {
+    const filePath = path.join(baseUrl, file.name);
+    if (shouldIgnore(filePath.slice(options.directory.length))) continue;
+    
+    if (file.isDirectory()) {
+      const dirPair: NestedPair<string> = [cleanName(file.name), []];
+      (pairChildren || nestedPaths).push(dirPair);
+      promises.push(
+        getMarkdownFiles(filePath, dirPair[1] as NestedPair<string>[]),
+      );
+    } else if (file.name.endsWith(".md")) {
+      (pairChildren || nestedPaths).push([cleanName(file.name), null]);
+      promises.push(Promise.resolve([filePath]));
+    }
+  }
+
+  if (finalConfig.sortRoutes)
+    if (pairChildren) pairChildren.sort((a, b) => a[0].localeCompare(b[0]));
+    else nestedPaths.sort((a, b) => a[0].localeCompare(b[0]));
+
+  return finalConfig.trimIndex
+    ? (await Promise.all(promises)).flat().map(trimIndexFromPath)
+    : (await Promise.all(promises)).flat();
 }
 
 export function cleanNestedPaths(np: typeof nestedPaths = nestedPaths) {
@@ -151,10 +150,10 @@ export async function generateHtml() {
       .replace(
         "{{fonts}}",
         finalConfig.fonts
-          ? (finalConfig.fonts.title
+          ? (finalConfig.fonts.title && finalConfig.fonts.title.url
               ? `<link rel="preconnect" href="${finalConfig.fonts.title.url}" />`
               : "") +
-              (finalConfig.fonts.body
+              (finalConfig.fonts.body && finalConfig.fonts.body.url
                 ? `<link rel="preconnect" href="${finalConfig.fonts.body.url}" />`
                 : "")
           : "",

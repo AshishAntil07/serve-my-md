@@ -5,7 +5,12 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
-    testTimeout: 1000
+    testTimeout: 1000,
+    sequence: {
+      concurrent: false
+    },
+    hookTimeout: 25000,
+    setupFiles: [path.resolve(__dirname, "tests/pretest.ts")],
   },
   resolve: {
     alias: {

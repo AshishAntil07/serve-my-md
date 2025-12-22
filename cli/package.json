@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
-    "test": "vitest",
+    "test": "yarn build && vitest",
     "start": "node ./bin/index.js"
   },
   "volta": {

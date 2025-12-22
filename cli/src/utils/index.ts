@@ -19,6 +19,10 @@ export function trimIndexFromPath(filePath: string): string {
   );
 }
 
+export function cleanName(filename: string): string {
+  return filename === "index.md" ? "" : filename.replace(/\.md$/, "");
+}
+
 export function slugify(filepath: string) {
   return filepath
     .toLowerCase()

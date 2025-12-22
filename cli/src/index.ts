@@ -101,7 +101,7 @@ if (finalConfig.publicPath) {
   ) {
     logger.log(`Copying public assets from ${finalConfig.publicPath}...`);
     execSync(
-      `cp -r "${path.join(options.directory, finalConfig.publicPath)}/*" "${webDir}/public/"`,
+      `cp -r "${path.join(options.directory, finalConfig.publicPath)}"/* "${webDir}/public/"`,
     );
     logger.log("Copied public assets");
   } else {
