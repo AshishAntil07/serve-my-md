@@ -16,6 +16,7 @@ import App from '@/App.tsx';
 import Rendrer from '@/components/Rendrer.tsx';
 import { SidebarProvider } from '@/components/ui/sidebar.tsx';
 import { pathsContext } from '@/contexts';
+import Fonts from '@/components/Fonts.tsx';
 
 import out from '@/output.json' with { type: 'json' };
 import paths from '@/paths.json' with { type: 'json' };
@@ -27,6 +28,7 @@ const rootRoute = createRootRoute({
         <SidebarProvider>
           <App>
             <Outlet />
+            <Fonts />
           </App>
         </SidebarProvider>
       </pathsContext.Provider>
@@ -40,7 +42,7 @@ const routes: Array<AppRoute> = [];
 out.routes.forEach((route, i) => {
   const newRoute = createRoute({
     getParentRoute: () => rootRoute,
-    path: route.path,
+    path: route.path || '/',
     component: () => (
       <Rendrer
         path={route.path}

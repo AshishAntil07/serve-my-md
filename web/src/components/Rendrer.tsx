@@ -1,5 +1,12 @@
-import { useNavigate } from "@tanstack/react-router"
-import { useEffect, useRef } from "react"
+import { useNavigate } from '@tanstack/react-router';
+import { useEffect, useRef } from 'react';
+import Prism from 'prismjs';
+import { useHotkeys } from 'react-hotkeys-hook';
+
+import Bettercrumb from './Bettercrumb';
+import { Button } from './ui/button';
+import IntentLink from './IntentLink';
+import { Kbd } from './ui/kbd';
 
 export default function Rendrer({
   path,
@@ -8,35 +15,77 @@ export default function Rendrer({
   prev,
   title
 }: {
-  path: string
-  content: string
-  next?: string
-  prev?: string
-  title: string
+  path: string;
+  content: string;
+  next?: string;
+  prev?: string;
+  title: string;
 }) {
   const articleRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
+  const prevRef = useRef<HTMLButtonElement>(null);
+  const nextRef = useRef<HTMLButtonElement>(null);
+
+  useHotkeys('alt+shift+enter', (e) => {
+    e.preventDefault();
+    if (prev && prevRef.current) prevRef.current.click();
+  }, [prev]);
+
+  useHotkeys('alt+enter', (e) => {
+    e.preventDefault();
+    if (next && nextRef.current) nextRef.current.click();
+  }, [next]);
+
   useEffect(() => {
-    if(!articleRef.current) return;
+    if (!articleRef.current) return;
 
     const article = articleRef.current;
-    article.querySelectorAll("a").forEach((elem: HTMLAnchorElement, i) => {
+    article.querySelectorAll('a').forEach((elem: HTMLAnchorElement) => {
       elem.addEventListener('click', (e) => {
+        if (
+          elem.getAttribute('href')?.startsWith('http://') ||
+          elem.getAttribute('href')?.startsWith('https://')
+        )
+          return;
         e.preventDefault();
         navigate({ to: elem.getAttribute('href') || '/' });
       });
     });
+
+    Prism.highlightAllUnder(article, true);
   }, [articleRef.current]);
 
   return (
     <>
-      <main>
-        {/* breadcrumb */}
-        <article ref={articleRef} className='main-article' dangerouslySetInnerHTML={{__html: content}} />
+      <main className="py-10 w-full">
+        <Bettercrumb path={path} />
 
-        {/* next prev buttons */}
+        <h1 className="text-3xl font-bold mt-4">{title}</h1>
+
+        <article
+          ref={articleRef}
+          className="main-article w-full mt-4"
+          dangerouslySetInnerHTML={{ __html: content }}
+        />
+
+        <div className="flex justify-between mt-10 w-full">
+          {prev ? (
+            <>
+              <Button variant="outline" asChild ref={prevRef}>
+                <IntentLink to={prev}>Previous <Kbd>Alt + Shift + ⏎</Kbd></IntentLink>
+              </Button>
+            </>
+          ) : null}
+          {next ? (
+            <>
+              <Button variant="outline" asChild ref={nextRef}>
+                <IntentLink to={next}>Next <Kbd>Alt + ⏎</Kbd></IntentLink>
+              </Button>
+            </>
+          ) : null}
+        </div>
       </main>
     </>
-  )
+  );
 }

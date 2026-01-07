@@ -1,7 +1,162 @@
 @import "tailwindcss";
 
 .main-article {
+  h1,h2,h3,h4 {
+    font-family: var(--font-heading);
+  }
+
   h1 {
     @apply text-4xl font-bold mb-4;
   }
+
+  h2 {
+    @apply text-3xl font-semibold mb-3;
+  }
+
+  h3 {
+    @apply text-2xl font-semibold mb-2;
+  }
+
+  h4 {
+    @apply text-xl font-semibold mb-2;
+  }
+
+  p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  a {
+    @apply text-blue-400 hover:underline;
+  }
+
+  hr {
+    @apply my-8 text-gray-700 w-[calc(100%+2rem)] -mx-4;
+
+    &.footnotes-sep {
+      @apply mt-16 mb-2;
+    }
+  }
+
+  ul {
+    @apply list-disc list-inside mb-4;
+
+    &.contains-task-list {
+      @apply list-none;
+      & > li {
+        @apply flex items-start gap-2;
+      }
+    }
+
+    li > ul, li > ol {
+      @apply ml-5;
+    }
+
+    & > li > ul {
+      @apply list-[circle];
+
+      & > li > ul {
+        @apply list-[square];
+      }
+    }
+
+    & > li > ol {
+      @apply list-[lower-roman];
+      
+      & > li > ol {
+        @apply list-[lower-alpha];
+      }
+    }
+  }
+
+  ol {
+    @apply list-decimal list-inside mb-4;
+
+    li > ul, li > ol {
+      @apply ml-5;
+    }
+
+    & > li > ul {
+      @apply list-[circle];
+
+      & > li > ul {
+        @apply list-[square];
+      }
+    }
+
+    & > li > ol {
+      @apply list-[lower-roman];
+      
+      & > li > ol {
+        @apply list-[lower-alpha];
+      }
+    }
+
+    &.footnotes-list {
+      @apply p-2 m-0;
+      li p {
+        @apply inline-block mb-2;
+      }
+    }
+  }
+
+  section.footnotes {
+    &:before {
+      @apply content-['Footnotes'] block text-2xl font-semibold mb-4;
+      font-family: var(--font-heading);
+    }
+
+    @apply mt-4 p-4
+  }
+
+  blockquote {
+    @apply p-3 bg-gray-700 border-l-4 border-l-gray-500;
+
+    p {
+      @apply m-0;
+    }
+  }
+
+  table {
+    thead {
+      @apply bg-gray-500;
+
+      th {
+        @apply px-4;
+      }
+    }
+
+    tbody {
+      @apply bg-gray-700;
+
+      td {
+        @apply px-4 py-1;
+      }
+    }
+  }
+
+  input[type="checkbox"] {
+    @apply w-4 h-4 rounded-sm cursor-pointer inline-flex items-center justify-center appearance-none mt-1;
+
+    
+    &:disabled {
+      background: #ddd;
+      border-color: #aaa;
+      cursor: not-allowed;
+
+      &:before {
+        @apply content-['⛌'] text-black scale-80;
+      }
+      
+      &:checked {
+        background: #4caf50;
+
+        &:before {
+          @apply content-['✓'] text-white scale-y-60;
+        }
+
+      }
+    }
+  }
+
+
 }

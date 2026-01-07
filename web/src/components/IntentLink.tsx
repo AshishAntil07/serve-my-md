@@ -1,16 +1,17 @@
 import { Link } from '@tanstack/react-router';
 
-export default function IntentLink({
-  to,
-  children,
-  ...props
-}: { to: string; children: React.ReactNode }) {
+export interface IntentLinkProps {
+  to: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export default function IntentLink({ to, children, ...props }: IntentLinkProps) {
   return (
     <Link
       to={to}
       preload={'intent'}
-      preloadDelay={200}
-      preloadIntentProximity={200}
+      preloadDelay={400}
       {...props}
     >
       {children}

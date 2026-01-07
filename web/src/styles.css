@@ -1,5 +1,4 @@
 @import 'tailwindcss';
-
 @import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
@@ -11,6 +10,15 @@ body {
     'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  transition: outline .1s;
+  
+  &:focus {
+    outline: 3px solid rgb(46, 119, 229);
+    border-radius: 3px;
+  }
 }
 
 code {
@@ -90,6 +98,12 @@ code {
 }
 
 @theme inline {
+  --font-body: var(--font-out-body);
+  --font-heading: var(--font-out-heading);
+  --font-code: var(--font-out-code);
+
+  --default-font-family: var(--font-body);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
