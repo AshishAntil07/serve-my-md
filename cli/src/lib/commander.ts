@@ -1,5 +1,7 @@
+import * as inquirer from "@inquirer/prompts";
 import config from "../config.json" with { type: "json" };
 import { Command } from "commander";
+import type { Args } from "@/types/index.js";
 
 const program = new Command();
 
@@ -14,6 +16,14 @@ program.option("-i, --interactive", "Enable interactive mode");
 
 program.parse(process.argv);
 
-export const options = program.opts();
+export const options: Args = program.opts();
+
+if (options.interactive || options.directory === undefined) {
+  const res = await inquirer.input({
+    message: `Enter root directory: `,
+    default: options.directory || "./",
+  });
+  options.directory = res.trim();
+}
 
 export default program;

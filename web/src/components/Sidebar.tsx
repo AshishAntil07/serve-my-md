@@ -2,7 +2,7 @@ import { useContext, useMemo } from 'react';
 import { ChevronsUpDown } from 'lucide-react';
 import type { JSX } from 'react';
 
-import type { Out } from '@/types';
+import type { Out } from '@shared/index';
 import { pathsContext } from '@/contexts';
 import {
   Sidebar as Sb,
@@ -11,7 +11,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
 } from '@/components/ui/sidebar';
-import outJ from '@/output.json' with { type: 'json' };
+import outJ from '@/.generated/output.json' with { type: 'json' };
 import IntentLink from '@/components/IntentLink';
 import ThemeSwitch from '@/components/ThemeSwitcher';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';

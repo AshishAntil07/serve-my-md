@@ -33,12 +33,12 @@ const RAW_RUNTIME_STATE =
           ["@types/markdown-it-footnote", "npm:3.0.4"],\
           ["@types/node", "npm:24.10.1"],\
           ["@types/prismjs", "npm:1.26.5"],\
-          ["commander", "npm:14.0.2"],\
-          ["markdown-it", "npm:14.1.0"],\
+          ["commander", "npm:14.0.3"],\
+          ["markdown-it", "npm:14.1.1"],\
           ["markdown-it-footnote", "npm:4.0.0"],\
           ["markdown-it-github-headings", "npm:2.0.1"],\
           ["markdown-it-task-lists", "npm:2.1.1"],\
-          ["minimatch", "npm:10.1.1"],\
+          ["minimatch", "npm:10.2.0"],\
           ["prettier", "npm:3.6.2"],\
           ["prismjs", "npm:1.30.0"],\
           ["serve-my-md", "workspace:."],\
@@ -834,6 +834,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@isaacs/cliui", [\
+      ["npm:9.0.0", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/@isaacs-cliui-npm-9.0.0-f5b610cfb2-10c0.zip/node_modules/@isaacs/cliui/",\
+        "packageDependencies": [\
+          ["@isaacs/cliui", "npm:9.0.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@isaacs/fs-minipass", [\
       ["npm:4.0.1", {\
         "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/@isaacs-fs-minipass-npm-4.0.1-677026e841-10c0.zip/node_modules/@isaacs/fs-minipass/",\
@@ -1372,6 +1381,26 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["balanced-match", [\
+      ["npm:4.0.2", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/balanced-match-npm-4.0.2-8236a65990-10c0.zip/node_modules/balanced-match/",\
+        "packageDependencies": [\
+          ["balanced-match", "npm:4.0.2"],\
+          ["jackspeak", "npm:4.2.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["brace-expansion", [\
+      ["npm:5.0.2", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/brace-expansion-npm-5.0.2-9598014784-10c0.zip/node_modules/brace-expansion/",\
+        "packageDependencies": [\
+          ["balanced-match", "npm:4.0.2"],\
+          ["brace-expansion", "npm:5.0.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["bundle-require", [\
       ["npm:5.1.0", {\
         "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/bundle-require-npm-5.1.0-022b2c8e1b-10c0.zip/node_modules/bundle-require/",\
@@ -1490,10 +1519,10 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["commander", [\
-      ["npm:14.0.2", {\
-        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/commander-npm-14.0.2-538b84c387-10c0.zip/node_modules/commander/",\
+      ["npm:14.0.3", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/commander-npm-14.0.3-93ab31471d-10c0.zip/node_modules/commander/",\
         "packageDependencies": [\
-          ["commander", "npm:14.0.2"]\
+          ["commander", "npm:14.0.3"]\
         ],\
         "linkType": "HARD"\
       }],\
@@ -1885,6 +1914,16 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["jackspeak", [\
+      ["npm:4.2.3", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/jackspeak-npm-4.2.3-f109d7d54c-10c0.zip/node_modules/jackspeak/",\
+        "packageDependencies": [\
+          ["@isaacs/cliui", "npm:9.0.0"],\
+          ["jackspeak", "npm:4.2.3"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["joycon", [\
       ["npm:3.1.1", {\
         "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/joycon-npm-3.1.1-3033e0e5f4-10c0.zip/node_modules/joycon/",\
@@ -1971,13 +2010,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["markdown-it", [\
-      ["npm:14.1.0", {\
-        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/markdown-it-npm-14.1.0-e337d75bfe-10c0.zip/node_modules/markdown-it/",\
+      ["npm:14.1.1", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/markdown-it-npm-14.1.1-45c173274d-10c0.zip/node_modules/markdown-it/",\
         "packageDependencies": [\
           ["argparse", "npm:2.0.1"],\
           ["entities", "npm:4.5.0"],\
           ["linkify-it", "npm:5.0.0"],\
-          ["markdown-it", "npm:14.1.0"],\
+          ["markdown-it", "npm:14.1.1"],\
           ["mdurl", "npm:2.0.0"],\
           ["punycode.js", "npm:2.3.1"],\
           ["uc.micro", "npm:2.1.0"]\
@@ -2029,6 +2068,14 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["@isaacs/brace-expansion", "npm:5.0.0"],\
           ["minimatch", "npm:10.1.1"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:10.2.0", {\
+        "packageLocation": "../../../../home/ashishantil/.yarn/berry/cache/minimatch-npm-10.2.0-63c4781adf-10c0.zip/node_modules/minimatch/",\
+        "packageDependencies": [\
+          ["brace-expansion", "npm:5.0.2"],\
+          ["minimatch", "npm:10.2.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -2470,12 +2517,12 @@ const RAW_RUNTIME_STATE =
           ["@types/markdown-it-footnote", "npm:3.0.4"],\
           ["@types/node", "npm:24.10.1"],\
           ["@types/prismjs", "npm:1.26.5"],\
-          ["commander", "npm:14.0.2"],\
-          ["markdown-it", "npm:14.1.0"],\
+          ["commander", "npm:14.0.3"],\
+          ["markdown-it", "npm:14.1.1"],\
           ["markdown-it-footnote", "npm:4.0.0"],\
           ["markdown-it-github-headings", "npm:2.0.1"],\
           ["markdown-it-task-lists", "npm:2.1.1"],\
-          ["minimatch", "npm:10.1.1"],\
+          ["minimatch", "npm:10.2.0"],\
           ["prettier", "npm:3.6.2"],\
           ["prismjs", "npm:1.30.0"],\
           ["serve-my-md", "workspace:."],\

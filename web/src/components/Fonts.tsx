@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import output from '@/output.json' with { type: 'json' };
+import output from '@/.generated/output.json' with { type: 'json' };
 
 
 export default function Fonts() {

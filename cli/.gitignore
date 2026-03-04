@@ -1,4 +1,5 @@
 /.yarn/unplugged
+/.yarn/releases
 /bin
 
 /tests/fixtures/md/*/dist

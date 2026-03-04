@@ -26,26 +26,10 @@ export interface SmmConfig {
   };
 }
 
-export interface Out {
-  rootTitle: string;
-  description: string;
-  baseRoute: string;
-  defaultTheme: string;
-  favicon?: string;
-  name: string;
-  fonts?: {
-    title?: string;
-    body: string;
-  };
-  showNameWithLogo: boolean;
-  routes: Route[];
+export interface Args {
+  directory: string;
+  interactive: boolean;
 }
-export interface Route {
-  path: string;
-  content: string;
-}
-
-export type NestedPair<T> = [T, NestedPair<T>[] | null];
 
 export type IgnoreRule = {
   pattern: string;

@@ -10,7 +10,8 @@ import {
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
 import '@/styles.css';
-import type { AppRoute, NestedPair } from '@/types/index.ts';
+import type { AppRoute } from '@/types/index.ts';
+import type { NestedPair } from '@shared/index';
 import reportWebVitals from '@/reportWebVitals.ts';
 import App from '@/App.tsx';
 import Rendrer from '@/components/Rendrer.tsx';
@@ -18,8 +19,8 @@ import { SidebarProvider } from '@/components/ui/sidebar.tsx';
 import { pathsContext } from '@/contexts';
 import Fonts from '@/components/Fonts.tsx';
 
-import out from '@/output.json' with { type: 'json' };
-import paths from '@/paths.json' with { type: 'json' };
+import out from '@/.generated/output.json' with { type: 'json' };
+import paths from '@/.generated/paths.json' with { type: 'json' };
 
 const rootRoute = createRootRoute({
   component: () => (
