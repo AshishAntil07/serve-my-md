@@ -12,7 +12,10 @@ program
 
 program.option("-d, --directory <path>", "Directory to scan for markdown files", ".");
 program.option("-i, --interactive", "Enable interactive mode");
-
+if(process.env.VITEST) {
+  program.option("--skip-build", "Skip the build step");
+}
+console.log("vitest", process.env.VITEST);
 
 program.parse(process.argv);
 

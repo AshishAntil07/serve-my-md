@@ -79,7 +79,7 @@ export async function getMarkdownFiles(
   const promises = [];
   for (const file of files) {
     const filePath = path.join(baseUrl, file.name);
-    if (shouldIgnore(filePath.slice(options.directory.length))) continue;
+    if (shouldIgnore(filePath.slice(options.directory.length)) || filePath.slice(options.directory.length) === finalConfig.publicPath) continue;
 
     if (file.isDirectory()) {
       const dirPair: NestedPair<string> = [cleanName(file.name), []];
@@ -130,9 +130,7 @@ export function getPath(filepath: string): string {
     .replace(/\.md$/, "");
 
   return (
-    (options.directory.endsWith("/") ? "/" : "") +
-    transformedPath.slice(0, transformedPath.lastIndexOf("/") + 1) +
-    slugify(transformedPath.slice(transformedPath.lastIndexOf("/") + 1))
+    slugify(transformedPath)
   );
 }
 

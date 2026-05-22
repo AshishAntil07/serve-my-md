@@ -7,6 +7,9 @@ import Bettercrumb from './Bettercrumb';
 import { Button } from './ui/button';
 import IntentLink from './IntentLink';
 import { Kbd } from './ui/kbd';
+import { SidebarTrigger } from './ui/sidebar';
+import { useIsMobile } from '@/hooks/useMobile';
+import { markElements } from '@/lib/utils';
 
 export default function Rendrer({
   path,
@@ -23,6 +26,7 @@ export default function Rendrer({
 }) {
   const articleRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
@@ -53,13 +57,18 @@ export default function Rendrer({
       });
     });
 
+    markElements(article);
+
     Prism.highlightAllUnder(article, true);
   }, [articleRef.current]);
 
   return (
     <>
       <main className="py-10 w-full">
-        <Bettercrumb path={path} />
+        <div className="flex items-center gap-2 justify-start">
+          {isMobile && <SidebarTrigger variant="outline" />}
+          <Bettercrumb path={path} />
+        </div>
 
         <h1 className="text-3xl font-bold mt-4">{title}</h1>
 

@@ -28,7 +28,7 @@ export function slugify(filepath: string) {
     .toLowerCase()
     .split("")
     .map((c) => {
-      if ('./,;"\'\\:<>`?!'.includes(c)) return "";
+      if ('.,;"\'\\:<>`?!'.includes(c)) return "";
       if (c === " " || c === "_") return "-";
       return c;
     })

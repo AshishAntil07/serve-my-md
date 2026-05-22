@@ -5,13 +5,96 @@ import { useHotkeys } from 'react-hotkeys-hook';
 
 import { Button } from './ui/button';
 import { Input } from './ui/input';
+import output from '@/.generated/output.json' with { type: 'json' };
 
 import type { Dispatch, SetStateAction } from 'react';
+import { cn, extractText, getTitleFromExtraction } from '@/lib/utils';
+import { useRouterState } from '@tanstack/react-router';
+import IntentLink from './IntentLink';
+
+type SearchResult = {
+  path: string;
+  title: string;
+  matches: number;
+  text: string;
+  targetElement: HTMLElement;
+};
+
+type SearchResultSimple = {
+  text: string;
+  targetElement: HTMLElement;
+};
+
+type SearchResults = {
+  internal: SearchResultSimple[];
+  external: SearchResult[];
+};
 
 export default function Search() {
   const [trig, trigger] = useState(false);
+  const [results, setResults] = useState<{
+    internal: SearchResultSimple[];
+    external: SearchResult[];
+  }>({
+    internal: [],
+    external: []
+  });
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const onChange = (val: string) => {
+    if (!val) {
+      setResults({ internal: [], external: [] });
+
+      return;
+    }
+
+    setResults(
+      output.routes.reduce(
+        (acc, route) => {
+          const extraction = extractText(route.content);
+
+          if (route.path === pathname) {
+            extraction.forEach(({ targetElement, text }) => {
+              if (text.toLowerCase().includes(val.toLowerCase())) {
+                acc.internal.push({
+                  text,
+                  targetElement
+                });
+              }
+            });
+
+            return acc;
+          }
+
+          extraction.every(({ targetElement, text }) => {
+            if (text.toLowerCase().includes(val.toLowerCase())) {
+              acc.external.push({
+                path: route.path,
+                matches: (text.match(new RegExp(val, 'gi')) || []).length,
+                text,
+                targetElement,
+                title: getTitleFromExtraction(extraction)
+              });
+
+              return false;
+            }
+
+            return true;
+          });
+
+          return acc;
+        },
+        { internal: [], external: [] } as typeof results
+      )
+    );
+  };
+
+  useEffect(() => {
+    setResults({ internal: [], external: [] });
+  }, [trig]);
 
   useHotkeys('ctrl+shift+f', () => trigger((t) => !t));
+  useHotkeys('esc', () => trigger(false));
 
   return (
     <>
@@ -20,11 +103,16 @@ export default function Search() {
         size="icon"
         title="Search"
         onClick={() => trigger((t) => !t)}
-        aria-keyshortcuts='Ctrl+Shift+F'
+        aria-keyshortcuts="Ctrl+Shift+F"
       >
         <SearchIcon />
       </Button>
-      <SearchInput displayState={trig} trigger={trigger} />
+      <SearchInput
+        displayState={trig}
+        trigger={trigger}
+        onChange={onChange}
+        searchResults={results}
+      />
     </>
   );
 }
@@ -33,10 +121,23 @@ interface SearchInputProps {
   trigger: Dispatch<SetStateAction<boolean>>;
   displayState: boolean;
   query?: string;
+  onChange: (val: string) => void;
+  searchResults: SearchResults;
 }
 
-function SearchInput({ displayState, trigger, query }: SearchInputProps) {
+function SearchInput({
+  displayState,
+  trigger,
+  query,
+  onChange,
+  searchResults
+}: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [changed, setChanged] = useState(0);
+
+  useEffect(() => {
+    setChanged((c) => c + 1);
+  }, [searchResults]);
 
   useEffect(() => {
     function remInput(e: MouseEvent) {
@@ -54,7 +155,8 @@ function SearchInput({ displayState, trigger, query }: SearchInputProps) {
       }
     }
 
-    if (displayState) setTimeout(() => document.addEventListener('click', remInput), 100);
+    if (displayState)
+      setTimeout(() => document.addEventListener('click', remInput), 100);
 
     return () => {
       if (displayState) document.removeEventListener('click', remInput);
@@ -62,6 +164,7 @@ function SearchInput({ displayState, trigger, query }: SearchInputProps) {
   }, [displayState]);
 
   useEffect(() => {
+    setChanged(0);
     if (displayState && inputRef.current) {
       inputRef.current.focus();
     }
@@ -70,14 +173,86 @@ function SearchInput({ displayState, trigger, query }: SearchInputProps) {
   if (!displayState) return null;
 
   return ReactDOM.createPortal(
-    <>
-      <Input
-        className="fixed top-4 left-1/2 -translate-x-1/2 w-1/2 shadow-[0px_-25px_50px_-10px_black] backdrop-blur-md bg-background/80!"
-        placeholder="Search for a candy.."
-        ref={inputRef}
-        defaultValue={query}
-      />
-    </>,
+    <div
+      className={cn(
+        'fixed top-0 left-0 w-full h-screen z-50 transition-all',
+        searchResults.internal.length + searchResults.external.length ||
+          changed > 2
+          ? 'bg-black/50 backdrop-blur-sm'
+          : ''
+      )}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          trigger(false);
+        }
+      }}
+    >
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 w-1/2">
+        <Input
+          className="shadow-[0px_-25px_50px_-10px_black] backdrop-blur-md bg-background/80!"
+          placeholder="Search for a candy.."
+          ref={inputRef}
+          defaultValue={query}
+          onChange={(e) => onChange(e.currentTarget.value)}
+        />
+
+        <SearchResults searchResults={searchResults} />
+      </div>
+    </div>,
     document.body
+  );
+}
+
+interface SearchResultsProps {
+  searchResults: SearchResults;
+}
+
+function SearchResults({ searchResults }: SearchResultsProps) {
+  if (!searchResults.internal.length && !searchResults.external.length) {
+    return <></>;
+  }
+
+  return (
+    <>
+      {searchResults.internal.length > 0 && (
+        <p className="px-2 text-sm text-muted-foreground">On this page</p>
+      )}
+      {searchResults.internal.map(
+        (result, i) =>
+          !result.targetElement.classList.contains('template') && (
+            <div
+              key={i}
+              onClick={() => {
+                if (result.targetElement.getAttribute('data-label')) {
+                  const el = document.querySelector(
+                    `[data-label="${result.targetElement.getAttribute('data-label')}"]`
+                  ) as HTMLElement;
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                } else if (result.targetElement.id) {
+                  const el = document.getElementById(result.targetElement.id);
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              className="cursor-pointer p-2 rounded hover:bg-secondary"
+            >
+              <p>{result.text}</p>
+            </div>
+          )
+      )}
+
+      <hr className="my-4" />
+
+      {searchResults.external.map((result, i) => (
+        <IntentLink
+          key={i}
+          to={result.path}
+          className="block p-2 rounded hover:bg-secondary"
+        >
+          <p className="text-sm text-muted-foreground">In {result.title}</p>
+          <p>{result.text}</p>
+          <p>{result.matches}</p>
+        </IntentLink>
+      ))}
+    </>
   );
 }

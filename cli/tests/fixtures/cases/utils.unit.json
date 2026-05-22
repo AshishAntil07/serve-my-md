@@ -5,8 +5,8 @@
       "output": "what-does-hhh-mean"
     },
     {
-      "input": "/hello/1. Hula Hoops!",
-      "output": "hello1-hula-hoops"
+      "input": "/2. Hello Mothucker/1. Hula Hoops!",
+      "output": "/2-hello-mothucker/1-hula-hoops"
     }
   ],
   "trimIndexFromPath": [

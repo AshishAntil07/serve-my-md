@@ -3,10 +3,10 @@ import { finalConfig } from "@/shared.js";
 import type { Args } from "@/types/index.js";
 import type { Route, Out, NestedPair } from "@shared/index.js";
 import { FileOrDirectoryExists } from "@/utils/index.js";
-import { execSync } from "child_process";
 import { cp, writeFile } from "fs/promises";
-import path from "path";
+import path, { resolve } from "path";
 import { fileURLToPath } from "url";
+import { build as viteBuild } from "vite";
 import {
   getMarkdownFiles,
   cleanNestedPaths,
@@ -15,7 +15,10 @@ import {
 } from "./index.js";
 import { mkdirSync } from "fs";
 
-export default async function build(options: Args): Promise<boolean> {
+export default async function build(
+  options: Args,
+): Promise<boolean> {
+  const skipBuild = options.skipBuild ?? false;
   const { nestedPaths, files: markdownFiles } = (await getMarkdownFiles(
     options.directory,
   )) as { nestedPaths: NestedPair<string>[]; files: string[] };
@@ -47,12 +50,15 @@ export default async function build(options: Args): Promise<boolean> {
 
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-  const webDir = path.join(__dirname, "..", "..", "web");
+  const webDir = path.join(__dirname, "..", "web");
   const distDir = path.join(webDir, "dist");
 
   mkdirSync(path.join(webDir, "src", ".generated"), { recursive: true });
 
-  await writeFile(path.join(webDir, "src", ".generated", "output.json"), JSON.stringify(out));
+  await writeFile(
+    path.join(webDir, "src", ".generated", "output.json"),
+    JSON.stringify(out),
+  );
   await writeFile(
     path.join(webDir, "src", ".generated", "paths.json"),
     JSON.stringify(nestedPaths),
@@ -71,38 +77,32 @@ export default async function build(options: Args): Promise<boolean> {
       await cp(
         path.join(options.directory, finalConfig.publicPath),
         path.join(webDir, "public"),
-        { recursive: true }
+        { recursive: true },
       );
     } else {
       logger.error(`Public path "${finalConfig.publicPath}" does not exist!`);
     }
   }
 
-  logger.log("Installing dependencies...");
-  try {
-    execSync("npm install", { cwd: webDir });
-  } catch(err) {
-    logger.error("npm install failed: " + err);
-    return false;
-  }
+  console.log(skipBuild);
 
-  logger.log("Building the app...");
-  try {
-    execSync("npm run build", { cwd: webDir });
-  } catch(err) {
-    logger.error("Build failed: " + err);
-    return false;
-  }
-
-
-  logger.log("Built the app, copying results...");
-  return cp(distDir, options.directory)
-    .then(() => {
-      logger.log("Done successfully!");
-      return true;
-    })
-    .catch((err) => {
-      logger.error("Error copying files: " + err);
-      return false;
+  if (!skipBuild) {
+    logger.log("Building the app...");
+    await viteBuild({
+      configFile: resolve(webDir, "vite.config.ts"),
     });
+
+    logger.log("Built the app, copying results...");
+    return cp(distDir, options.directory)
+      .then(() => {
+        logger.log("Done successfully!");
+        return true;
+      })
+      .catch((err) => {
+        logger.error("Error copying files: " + err);
+        return false;
+      });
+  }
+
+  return Promise.resolve(true);
 }

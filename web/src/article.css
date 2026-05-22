@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./styles.css";
 
 .main-article {
   h1,h2,h3,h4 {
@@ -109,7 +110,7 @@
   }
 
   blockquote {
-    @apply p-3 bg-gray-700 border-l-4 border-l-gray-500;
+    @apply p-3 bg-muted border-l-4 border-border text-foreground;
 
     p {
       @apply m-0;
@@ -117,8 +118,10 @@
   }
 
   table {
+    @apply w-full;
+
     thead {
-      @apply bg-gray-500;
+      @apply bg-accent;
 
       th {
         @apply px-4;
@@ -126,11 +129,17 @@
     }
 
     tbody {
-      @apply bg-gray-700;
+      tr:nth-child(odd) {
+        @apply bg-muted;
+      }
 
       td {
         @apply px-4 py-1;
       }
+    }
+
+    th, td {
+      @apply border border-border;
     }
   }
 

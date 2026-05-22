@@ -28,6 +28,7 @@ export interface SmmConfig {
 
 export interface Args {
   directory: string;
+  skipBuild?: boolean;
   interactive: boolean;
 }
 
