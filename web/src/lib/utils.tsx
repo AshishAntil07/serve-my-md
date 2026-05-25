@@ -1,6 +1,7 @@
 import {  clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import type {ClassValue} from 'clsx';
+import type React from 'react';
 
 export function cn(...inputs: Array<ClassValue>) {
   return twMerge(clsx(inputs))
@@ -21,7 +22,7 @@ export function flatDom(elements: HTMLElement[]): HTMLElement[] {
   return elements.reduce((acc, el) => {
     if (el.children.length === 0) return [...acc, el];
 
-    return [...acc, el, ...flatDom(Array.from(el.children) as HTMLElement[])];
+    return [...acc, ...flatDom(Array.from(el.children) as HTMLElement[])];
   }, [] as HTMLElement[]);
 }
 
@@ -58,4 +59,22 @@ export function markElementsFromExtraction(extraction: ReturnType<typeof extract
       }
     }
   });
+}
+
+export function highlightSubstring(text: string, substring: string): React.ReactNode[] {
+  if(!substring) return [text];
+
+  const result: React.ReactNode[] = [];
+  let occurrence = -1, prev = 0;
+
+  const lowercaseText = text.toLowerCase(), lowercaseSubstring = substring.toLowerCase();
+
+  while((occurrence = lowercaseText.indexOf(lowercaseSubstring, prev)) + 1) {
+    result.push(text.slice(prev, occurrence));
+    prev = occurrence + substring.length;
+    result.push(<mark key={occurrence}>{text.slice(occurrence, prev)}</mark>);
+  }
+  result.push(text.slice(prev));
+
+  return result;
 }

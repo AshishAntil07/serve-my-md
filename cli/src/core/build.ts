@@ -2,7 +2,11 @@ import logger from "@/lib/logger.js";
 import { finalConfig } from "@/shared.js";
 import type { Args } from "@/types/index.js";
 import type { Route, Out, NestedPair } from "@shared/index.js";
-import { FileOrDirectoryExists } from "@/utils/index.js";
+import {
+  FileOrDirectoryExists,
+  makeRoutesOfNestedPaths,
+  optional,
+} from "@/utils/index.js";
 import { cp, writeFile } from "fs/promises";
 import path, { resolve } from "path";
 import { fileURLToPath } from "url";
@@ -15,9 +19,7 @@ import {
 } from "./index.js";
 import { mkdirSync } from "fs";
 
-export default async function build(
-  options: Args,
-): Promise<boolean> {
+export default async function build(options: Args): Promise<boolean> {
   const skipBuild = options.skipBuild ?? false;
   const { nestedPaths, files: markdownFiles } = (await getMarkdownFiles(
     options.directory,
@@ -30,6 +32,16 @@ export default async function build(
     parsePromises.push(parseMD(file));
   }
 
+  const groupedRoutes = Object.groupBy(
+    await Promise.all(parsePromises),
+    (route) => route.path,
+  );
+
+  const routes = makeRoutesOfNestedPaths(nestedPaths).reduce(
+    (acc, path) => [...acc, ...(groupedRoutes[path] ?? [])],
+    [] as Route[],
+  );
+
   const out: Out = {
     rootTitle: finalConfig.rootTitle ?? "Documentation",
     description: finalConfig.description ?? "Documentation",
@@ -37,14 +49,17 @@ export default async function build(
     defaultTheme: finalConfig.defaultTheme ?? "dark",
     name: finalConfig.name ?? "Serve My MD",
     showNameWithLogo: finalConfig.showNameWithLogo ?? false,
-    routes: await Promise.all(parsePromises),
+    routes,
     fonts: {
       title: finalConfig.fonts?.title?.name || "serif",
-      body: finalConfig.fonts?.body.name || "sans-serif",
+      body: finalConfig.fonts?.body?.name || "sans-serif",
+      mono: finalConfig.fonts?.mono?.name || "monospace",
     },
-    ...(finalConfig.favicon ? { favicon: finalConfig.favicon } : {}),
+    ...optional("favicon", finalConfig.favicon),
+    ...optional("version", finalConfig.version),
   };
-  out.routes.forEach((o) => {
+
+  routes.forEach((o) => {
     logger.log(o.path);
   });
 

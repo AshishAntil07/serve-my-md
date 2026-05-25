@@ -79,7 +79,11 @@ export async function getMarkdownFiles(
   const promises = [];
   for (const file of files) {
     const filePath = path.join(baseUrl, file.name);
-    if (shouldIgnore(filePath.slice(options.directory.length)) || filePath.slice(options.directory.length) === finalConfig.publicPath) continue;
+    if (
+      shouldIgnore(filePath.slice(options.directory.length)) ||
+      filePath.slice(options.directory.length) === finalConfig.publicPath
+    )
+      continue;
 
     if (file.isDirectory()) {
       const dirPair: NestedPair<string> = [cleanName(file.name), []];
@@ -94,18 +98,23 @@ export async function getMarkdownFiles(
   }
 
   if (finalConfig.sortRoutes)
-    nestedPaths.sort((a, b) => a[0].localeCompare(b[0]));
+    nestedPaths.sort((a, b) => {
+      const awrapper = a[0].startsWith('(') && a[0].endsWith(')');
+      const bwrapper = b[0].startsWith('(') && b[0].endsWith(')');
 
-  return pairChildren
-    ? finalConfig.trimIndex
-      ? (await Promise.all(promises)).flat().map(val => trimIndexFromPath(val as string))
-      : (await Promise.all(promises)).flat() as string[]
-    : {
-        nestedPaths,
-        files: finalConfig.trimIndex
-          ? (await Promise.all(promises)).flat().map(val => trimIndexFromPath(val as string))
-          : (await Promise.all(promises)).flat() as string[],
-      };
+      if(awrapper && !bwrapper) return 1;
+      if(bwrapper && !awrapper) return -1;
+
+      return a[0].localeCompare(b[0]);
+    });
+
+  const filess = finalConfig.trimIndex
+    ? (await Promise.all(promises))
+        .flat()
+        .map((val) => trimIndexFromPath(val as string))
+    : ((await Promise.all(promises)).flat() as string[]);
+
+  return pairChildren ? filess : { nestedPaths, files: filess };
 }
 
 export function cleanNestedPaths(nestedPaths: NestedPair<string>[]): void {
@@ -129,9 +138,7 @@ export function getPath(filepath: string): string {
     .replace(/\/index.md$/, "")
     .replace(/\.md$/, "");
 
-  return (
-    slugify(transformedPath)
-  );
+  return slugify(transformedPath).split("/").filter((s) => !(s.startsWith("(") && s.endsWith(")"))).join('/') || '/';
 }
 
 export async function parseMD(
@@ -160,10 +167,13 @@ export async function generateHtml() {
         "{{fonts}}",
         finalConfig.fonts
           ? (finalConfig.fonts.title && finalConfig.fonts.title.url
-              ? `<link rel="preconnect" href="${finalConfig.fonts.title.url}" />`
+              ? `<link rel="stylesheet" href="${finalConfig.fonts.title.url}" />`
               : "") +
               (finalConfig.fonts.body && finalConfig.fonts.body.url
-                ? `<link rel="preconnect" href="${finalConfig.fonts.body.url}" />`
+                ? `<link rel="stylesheet" href="${finalConfig.fonts.body.url}" />`
+                : "") +
+              (finalConfig.fonts.mono && finalConfig.fonts.mono.url
+                ? `<link rel="stylesheet" href="${finalConfig.fonts.mono.url}" />`
                 : "")
           : "",
       );

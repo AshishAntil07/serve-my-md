@@ -3,7 +3,7 @@
 
 .main-article {
   h1,h2,h3,h4 {
-    font-family: var(--font-heading);
+    font-family: var(--font-title);
   }
 
   h1 {
@@ -20,6 +20,10 @@
 
   h4 {
     @apply text-xl font-semibold mb-2;
+  }
+
+  mark {
+    @apply bg-yellow-300 text-black px-1 rounded;
   }
 
   p {
@@ -103,7 +107,7 @@
   section.footnotes {
     &:before {
       @apply content-['Footnotes'] block text-2xl font-semibold mb-4;
-      font-family: var(--font-heading);
+      font-family: var(--font-title);
     }
 
     @apply mt-4 p-4

@@ -6,9 +6,11 @@ export interface Out {
   favicon?: string;
   logo?: string;
   name: string;
+  version?: string;
   fonts?: {
-    title?: string;
+    title: string;
     body: string;
+    mono: string;
   };
   showNameWithLogo: boolean;
   routes: Route[];

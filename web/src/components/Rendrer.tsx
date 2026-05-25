@@ -10,6 +10,8 @@ import { Kbd } from './ui/kbd';
 import { SidebarTrigger } from './ui/sidebar';
 import { useIsMobile } from '@/hooks/useMobile';
 import { markElements } from '@/lib/utils';
+import Search from './Search';
+import ThemeSwitch from './ThemeSwitcher';
 
 export default function Rendrer({
   path,
@@ -31,15 +33,23 @@ export default function Rendrer({
   const prevRef = useRef<HTMLButtonElement>(null);
   const nextRef = useRef<HTMLButtonElement>(null);
 
-  useHotkeys('alt+shift+enter', (e) => {
-    e.preventDefault();
-    if (prev && prevRef.current) prevRef.current.click();
-  }, [prev]);
+  useHotkeys(
+    'alt+shift+enter',
+    (e) => {
+      e.preventDefault();
+      if (prev && prevRef.current) prevRef.current.click();
+    },
+    [prev]
+  );
 
-  useHotkeys('alt+enter', (e) => {
-    e.preventDefault();
-    if (next && nextRef.current) nextRef.current.click();
-  }, [next]);
+  useHotkeys(
+    'alt+enter',
+    (e) => {
+      e.preventDefault();
+      if (next && nextRef.current) nextRef.current.click();
+    },
+    [next]
+  );
 
   useEffect(() => {
     if (!articleRef.current) return;
@@ -65,9 +75,15 @@ export default function Rendrer({
   return (
     <>
       <main className="py-10 w-full">
-        <div className="flex items-center gap-2 justify-start">
-          {isMobile && <SidebarTrigger variant="outline" />}
-          <Bettercrumb path={path} />
+        <div className="flex items-center gap-2 justify-between">
+          <div className="flex items-center gap-2 justify-start">
+            {isMobile && <SidebarTrigger variant="outline" />}
+            <Bettercrumb path={path} />
+          </div>
+          <div className="flex items-center gap-2 justify-end">
+            <ThemeSwitch />
+            <Search />
+          </div>
         </div>
 
         <h1 className="text-3xl font-bold mt-4">{title}</h1>
@@ -82,17 +98,21 @@ export default function Rendrer({
           {prev ? (
             <>
               <Button variant="outline" asChild ref={prevRef}>
-                <IntentLink to={prev}>Previous <Kbd>Alt + Shift + ⏎</Kbd></IntentLink>
+                <IntentLink to={prev}>
+                  Previous <Kbd>Alt + Shift + ⏎</Kbd>
+                </IntentLink>
               </Button>
             </>
-          ) : null}
+          ) : <span></span>}
           {next ? (
             <>
               <Button variant="outline" asChild ref={nextRef}>
-                <IntentLink to={next}>Next <Kbd>Alt + ⏎</Kbd></IntentLink>
+                <IntentLink to={next}>
+                  Next <Kbd>Alt + ⏎</Kbd>
+                </IntentLink>
               </Button>
             </>
-          ) : null}
+          ) : <span></span>}
         </div>
       </main>
     </>

@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import type { OpenGraph } from "@/types/og.js";
+import type { NestedPair, Route } from "@shared/index.js";
 
 const indexTokens = "1234567890.";
 
@@ -23,12 +24,16 @@ export function cleanName(filename: string): string {
   return filename === "index.md" ? "" : filename.replace(/\.md$/, "");
 }
 
+export function optional(prop: string, val: any) {
+  return val ? { [prop]: val } : {};
+}
+
 export function slugify(filepath: string) {
   return filepath
     .toLowerCase()
     .split("")
     .map((c) => {
-      if ('.,;"\'\\:<>`?!'.includes(c)) return "";
+      if (".,;\"'\\:<>`?!".includes(c)) return "";
       if (c === " " || c === "_") return "-";
       return c;
     })
@@ -44,6 +49,28 @@ export async function FileOrDirectoryExists(
   } catch {
     return false;
   }
+}
+
+export function makeRoutesOfNestedPaths(
+  nestedPaths: NestedPair<string>[],
+  prefix: string = "/",
+): string[] {
+  return nestedPaths.reduce((acc, [path, children]) => {
+    const isGrouper = path.startsWith("(") && path.endsWith(")");
+
+    return [
+      ...acc,
+      ...((isGrouper || !children)?[]:[prefix+path]),
+      ...(children
+        ? makeRoutesOfNestedPaths(
+            children,
+            prefix + (!isGrouper ? path + "/" : ""),
+          )
+        : isGrouper
+          ? []
+          : [prefix + path]),
+    ];
+  }, [] as string[]);
 }
 
 export function ogToHtml(og: OpenGraph): string {

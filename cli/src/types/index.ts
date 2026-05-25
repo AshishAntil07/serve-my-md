@@ -14,15 +14,20 @@ export interface SmmConfig {
   og?: OpenGraph;
   sortRoutes?: boolean;
   trimIndex?: boolean;
+  version?: string;
   fonts?: {
     title?: {
       name: string;
       url?: string;
     };
-    body: {
+    body?: {
       name: string;
       url?: string;
     };
+    mono?: {
+      name: string;
+      url?: string;
+    }
   };
 }
 

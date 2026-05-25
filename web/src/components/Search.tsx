@@ -8,7 +8,12 @@ import { Input } from './ui/input';
 import output from '@/.generated/output.json' with { type: 'json' };
 
 import type { Dispatch, SetStateAction } from 'react';
-import { cn, extractText, getTitleFromExtraction } from '@/lib/utils';
+import {
+  cn,
+  extractText,
+  getTitleFromExtraction,
+  highlightSubstring
+} from '@/lib/utils';
 import { useRouterState } from '@tanstack/react-router';
 import IntentLink from './IntentLink';
 
@@ -134,6 +139,7 @@ function SearchInput({
 }: SearchInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [changed, setChanged] = useState(0);
+  const [value, setValue] = useState(query || '');
 
   useEffect(() => {
     setChanged((c) => c + 1);
@@ -165,6 +171,7 @@ function SearchInput({
 
   useEffect(() => {
     setChanged(0);
+    setValue(query || '');
     if (displayState && inputRef.current) {
       inputRef.current.focus();
     }
@@ -178,7 +185,7 @@ function SearchInput({
         'fixed top-0 left-0 w-full h-screen z-50 transition-all',
         searchResults.internal.length + searchResults.external.length ||
           changed > 2
-          ? 'bg-black/50 backdrop-blur-sm'
+          ? 'bg-background/50 backdrop-blur-sm'
           : ''
       )}
       onClick={(e) => {
@@ -192,11 +199,14 @@ function SearchInput({
           className="shadow-[0px_-25px_50px_-10px_black] backdrop-blur-md bg-background/80!"
           placeholder="Search for a candy.."
           ref={inputRef}
-          defaultValue={query}
-          onChange={(e) => onChange(e.currentTarget.value)}
+          value={value}
+          onChange={(e) => {
+            setValue(e.currentTarget.value);
+            onChange(e.currentTarget.value);
+          }}
         />
 
-        <SearchResults searchResults={searchResults} />
+        <SearchResults searchResults={searchResults} query={value} />
       </div>
     </div>,
     document.body
@@ -205,9 +215,10 @@ function SearchInput({
 
 interface SearchResultsProps {
   searchResults: SearchResults;
+  query: string;
 }
 
-function SearchResults({ searchResults }: SearchResultsProps) {
+function SearchResults({ searchResults, query }: SearchResultsProps) {
   if (!searchResults.internal.length && !searchResults.external.length) {
     return <></>;
   }
@@ -235,7 +246,7 @@ function SearchResults({ searchResults }: SearchResultsProps) {
               }}
               className="cursor-pointer p-2 rounded hover:bg-secondary"
             >
-              <p>{result.text}</p>
+              <p>{highlightSubstring(result.text, query)}</p>
             </div>
           )
       )}
@@ -246,11 +257,17 @@ function SearchResults({ searchResults }: SearchResultsProps) {
         <IntentLink
           key={i}
           to={result.path}
-          className="block p-2 rounded hover:bg-secondary"
+          className="block p-3 rounded hover:bg-secondary border border-outline my-3"
         >
           <p className="text-sm text-muted-foreground">In {result.title}</p>
-          <p>{result.text}</p>
-          <p>{result.matches}</p>
+          <div className="flex items-center gap-2">
+            <p className="block text-ellipsis w-full overflow-hidden text-nowrap">
+              {highlightSubstring(result.text, query)}
+            </p>
+            <span className="py-1 px-1.5 rounded bg-secondary text-xs float-right text-nowrap">
+              matches: {result.matches}
+            </span>
+          </div>
         </IntentLink>
       ))}
     </>

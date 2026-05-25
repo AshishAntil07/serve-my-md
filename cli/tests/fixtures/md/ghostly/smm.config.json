@@ -1,0 +1,30 @@
+{
+  "rootTitle": "SMM Ghostly Fixture",
+  "description": "A fixture for testing ghostly operations in SMM.",
+  "baseRoute": "/",
+  "defaultTheme": "light",
+  "name": "Ghostly Store",
+  "version": "1.0.0 LTS",
+  "trimIndex": true,
+  "fonts": {
+    "title": {
+      "name": "Sorts Mill Goudy",
+      "url": "https://fonts.googleapis.com/css2?family=Sorts+Mill+Goudy:ital@0;1&display=swap"
+    },
+    "body": {
+      "name": "Montserrat",
+      "url": "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+    }
+  },
+  "og": {
+    "title": "SMM Ghostly Fixture",
+    "description": "A fixture for testing ghostly operations in SMM.",
+    "site_name": "SMM Ghostly Store",
+    "determiner": "the",
+    "images": [
+      {
+        "image": "/og-image.png"
+      }
+    ]
+  }
+}

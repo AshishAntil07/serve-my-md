@@ -31,6 +31,9 @@ function trimIndexFromPath(filePath) {
 function cleanName(filename) {
   return filename === "index.md" ? "" : filename.replace(/\.md$/, "");
 }
+function optional(prop, val) {
+  return val ? { [prop]: val } : {};
+}
 function slugify(filepath) {
   return filepath.toLowerCase().split("").map((c) => {
     if (".,;\"'\\:<>`?!".includes(c)) return "";
@@ -45,6 +48,19 @@ async function FileOrDirectoryExists(filepath) {
   } catch {
     return false;
   }
+}
+function makeRoutesOfNestedPaths(nestedPaths, prefix = "/") {
+  return nestedPaths.reduce((acc, [path4, children]) => {
+    const isGrouper = path4.startsWith("(") && path4.endsWith(")");
+    return [
+      ...acc,
+      ...isGrouper || !children ? [] : [prefix + path4],
+      ...children ? makeRoutesOfNestedPaths(
+        children,
+        prefix + (!isGrouper ? path4 + "/" : "")
+      ) : isGrouper ? [] : [prefix + path4]
+    ];
+  }, []);
 }
 function ogToHtml(og) {
   const tags = [];
@@ -152,7 +168,8 @@ async function getMarkdownFiles(baseUrl, pairChildren) {
   const promises = [];
   for (const file of files) {
     const filePath = path.join(baseUrl, file.name);
-    if (shouldIgnore(filePath.slice(options.directory.length)) || filePath.slice(options.directory.length) === finalConfig.publicPath) continue;
+    if (shouldIgnore(filePath.slice(options.directory.length)) || filePath.slice(options.directory.length) === finalConfig.publicPath)
+      continue;
     if (file.isDirectory()) {
       const dirPair = [cleanName(file.name), []];
       nestedPaths.push(dirPair);
@@ -165,11 +182,15 @@ async function getMarkdownFiles(baseUrl, pairChildren) {
     }
   }
   if (finalConfig.sortRoutes)
-    nestedPaths.sort((a, b) => a[0].localeCompare(b[0]));
-  return pairChildren ? finalConfig.trimIndex ? (await Promise.all(promises)).flat().map((val) => trimIndexFromPath(val)) : (await Promise.all(promises)).flat() : {
-    nestedPaths,
-    files: finalConfig.trimIndex ? (await Promise.all(promises)).flat().map((val) => trimIndexFromPath(val)) : (await Promise.all(promises)).flat()
-  };
+    nestedPaths.sort((a, b) => {
+      const awrapper = a[0].startsWith("(") && a[0].endsWith(")");
+      const bwrapper = b[0].startsWith("(") && b[0].endsWith(")");
+      if (awrapper && !bwrapper) return 1;
+      if (bwrapper && !awrapper) return -1;
+      return a[0].localeCompare(b[0]);
+    });
+  const filess = finalConfig.trimIndex ? (await Promise.all(promises)).flat().map((val) => trimIndexFromPath(val)) : (await Promise.all(promises)).flat();
+  return pairChildren ? filess : { nestedPaths, files: filess };
 }
 function cleanNestedPaths(nestedPaths) {
   for (const pair of nestedPaths) {
@@ -186,7 +207,7 @@ function cleanNestedPaths(nestedPaths) {
 }
 function getPath(filepath) {
   const transformedPath = filepath.replace(options.directory, "").replace(/\\/g, "/").replace(/\/index.md$/, "").replace(/\.md$/, "");
-  return slugify(transformedPath);
+  return slugify(transformedPath).split("/").filter((s) => !(s.startsWith("(") && s.endsWith(")"))).join("/") || "/";
 }
 async function parseMD(filepath) {
   const path4 = getPath(filepath);
@@ -203,7 +224,7 @@ async function generateHtml() {
     );
     return htmlTemplate.replace("{{og}}", ogToHtml(finalConfig.og ?? {})).replace("{{title}}", finalConfig.rootTitle ?? "Serve My MD").replace("{{description}}", finalConfig.description ?? "").replace("{{favicon}}", finalConfig.favicon ?? "").replace(
       "{{fonts}}",
-      finalConfig.fonts ? (finalConfig.fonts.title && finalConfig.fonts.title.url ? `<link rel="preconnect" href="${finalConfig.fonts.title.url}" />` : "") + (finalConfig.fonts.body && finalConfig.fonts.body.url ? `<link rel="preconnect" href="${finalConfig.fonts.body.url}" />` : "") : ""
+      finalConfig.fonts ? (finalConfig.fonts.title && finalConfig.fonts.title.url ? `<link rel="stylesheet" href="${finalConfig.fonts.title.url}" />` : "") + (finalConfig.fonts.body && finalConfig.fonts.body.url ? `<link rel="stylesheet" href="${finalConfig.fonts.body.url}" />` : "") + (finalConfig.fonts.mono && finalConfig.fonts.mono.url ? `<link rel="stylesheet" href="${finalConfig.fonts.mono.url}" />` : "") : ""
     );
   } catch (err) {
     throw new Error(`Failed to generate HTML: ${err}`);
@@ -272,6 +293,14 @@ async function build(options2) {
   for (const file of markdownFiles) {
     parsePromises.push(parseMD(file));
   }
+  const groupedRoutes = Object.groupBy(
+    await Promise.all(parsePromises),
+    (route) => route.path
+  );
+  const routes = makeRoutesOfNestedPaths(nestedPaths).reduce(
+    (acc, path4) => [...acc, ...groupedRoutes[path4] ?? []],
+    []
+  );
   const out = {
     rootTitle: finalConfig.rootTitle ?? "Documentation",
     description: finalConfig.description ?? "Documentation",
@@ -279,14 +308,16 @@ async function build(options2) {
     defaultTheme: finalConfig.defaultTheme ?? "dark",
     name: finalConfig.name ?? "Serve My MD",
     showNameWithLogo: finalConfig.showNameWithLogo ?? false,
-    routes: await Promise.all(parsePromises),
+    routes,
     fonts: {
       title: finalConfig.fonts?.title?.name || "serif",
-      body: finalConfig.fonts?.body.name || "sans-serif"
+      body: finalConfig.fonts?.body?.name || "sans-serif",
+      mono: finalConfig.fonts?.mono?.name || "monospace"
     },
-    ...finalConfig.favicon ? { favicon: finalConfig.favicon } : {}
+    ...optional("favicon", finalConfig.favicon),
+    ...optional("version", finalConfig.version)
   };
-  out.routes.forEach((o) => {
+  routes.forEach((o) => {
     Logger.log(o.path);
   });
   const __dirname = path3.dirname(fileURLToPath(import.meta.url));

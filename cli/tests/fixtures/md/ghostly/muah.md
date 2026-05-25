@@ -22,7 +22,7 @@
 ---
 
 ## Images
-![Placeholder](https://via.placeholder.com/150)
+![Placeholder](https://thumbs.dreamstime.com/b/fearsome-ancient-spartan-warrior-greece-red-cloak-spartan-helmet-night-spartan-movie-scene-action-sequence-spartan-helmet-284208996.jpg?w=360)
 
 ---
 
