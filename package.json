@@ -1,6 +1,6 @@
 {
   "name": "serve-my-md",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "A utility to create a static build for your markdown files",
   "repository": {
