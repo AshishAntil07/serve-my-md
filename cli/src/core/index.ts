@@ -99,16 +99,16 @@ export async function getMarkdownFiles(
 
   if (finalConfig.sortRoutes)
     nestedPaths.sort((a, b) => {
-      const awrapper = a[0].startsWith('(') && a[0].endsWith(')');
-      const bwrapper = b[0].startsWith('(') && b[0].endsWith(')');
+      const awrapper = a[0].startsWith("(") && a[0].endsWith(")");
+      const bwrapper = b[0].startsWith("(") && b[0].endsWith(")");
 
-      if(awrapper && !bwrapper) return 1;
-      if(bwrapper && !awrapper) return -1;
+      if (awrapper && !bwrapper) return 1;
+      if (bwrapper && !awrapper) return -1;
 
       return a[0].localeCompare(b[0]);
     });
 
-  const filess = finalConfig.trimIndex
+  const filess = finalConfig.trimIndexFromPath
     ? (await Promise.all(promises))
         .flat()
         .map((val) => trimIndexFromPath(val as string))
@@ -119,7 +119,7 @@ export async function getMarkdownFiles(
 
 export function cleanNestedPaths(nestedPaths: NestedPair<string>[]): void {
   for (const pair of nestedPaths) {
-    if (finalConfig.trimIndex) {
+    if (finalConfig.trimIndexFromPath) {
       pair[0] = trimIndexFromPath(pair[0]);
     }
     if (pair[1]) {
@@ -138,7 +138,12 @@ export function getPath(filepath: string): string {
     .replace(/\/index.md$/, "")
     .replace(/\.md$/, "");
 
-  return slugify(transformedPath).split("/").filter((s) => !(s.startsWith("(") && s.endsWith(")"))).join('/') || '/';
+  return (
+    slugify(transformedPath)
+      .split("/")
+      .filter((s) => !(s.startsWith("(") && s.endsWith(")")))
+      .join("/") || "/"
+  );
 }
 
 export async function parseMD(

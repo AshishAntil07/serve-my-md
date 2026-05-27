@@ -5,7 +5,7 @@ export default defineConfig({
   external: ["vite"],
   format: ["esm"],
   splitting: false,
-  sourcemap: true,
+  sourcemap: false,
   dts: false,
   clean: true,
   outDir: "bin"

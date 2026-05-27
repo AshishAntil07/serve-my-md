@@ -3,24 +3,40 @@
   "version": "1.0.0",
   "type": "module",
   "description": "A utility to create a static build for your markdown files",
-  "bin": "./bin/index.js",
-  "repository": "https://github.com/AshishAntil07/serve-my-md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AshishAntil07/serve-my-md.git"
+  },
   "author": "AshishAntil07 <ashishantil.antil07@gmail.com>",
   "license": "MIT",
-  "private": true,
+  "bin": {
+    "serve-my-md": "bin/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "bin",
+    "web",
+    "shared",
+    "index.html",
+    "README.md",
+    "LICENSE",
+    "package.json"
+  ],
   "scripts": {
     "dev": "tsup cli/src/index.ts --tsconfig cli/tsconfig.json --watch",
     "build": "tsup cli/src/index.ts --tsconfig cli/tsconfig.json",
     "start": "node bin/index.js",
     "test": "vitest run --config cli/vitest.config.ts",
-
     "dev:web": "vite --config web/vite.config.ts --port 3000",
     "build:web": "vite build --config web/vite.config.ts",
     "serve:web": "vite preview --config web/vite.config.ts",
     "test:web": "vitest run --config web/vitest.config.ts",
     "lint:web": "eslint web",
     "format:web": "prettier --write web",
-    "check:web": "prettier --write web && eslint web --fix"
+    "check:web": "prettier --write web && eslint web --fix",
+    "prepublishOnly": "pnpm build"
   },
   "devDependencies": {
     "@tanstack/devtools-vite": "^0.3.11",
@@ -74,6 +90,7 @@
     "tw-animate-css": "^1.3.6"
   },
   "volta": {
-    "node": "26.1.0"
+    "node": "26.1.0",
+    "npm": "11.15.0"
   }
 }

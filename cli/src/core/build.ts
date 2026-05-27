@@ -20,7 +20,8 @@ import {
 import { mkdirSync } from "fs";
 
 export default async function build(options: Args): Promise<boolean> {
-  const skipBuild = options.skipBuild ?? false;
+  const skipBuild = ('skipBuild' in options && options.skipBuild) ?? false;
+
   const { nestedPaths, files: markdownFiles } = (await getMarkdownFiles(
     options.directory,
   )) as { nestedPaths: NestedPair<string>[]; files: string[] };
@@ -98,8 +99,6 @@ export default async function build(options: Args): Promise<boolean> {
       logger.error(`Public path "${finalConfig.publicPath}" does not exist!`);
     }
   }
-
-  console.log(skipBuild);
 
   if (!skipBuild) {
     logger.log("Building the app...");

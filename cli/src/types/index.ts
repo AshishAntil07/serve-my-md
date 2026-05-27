@@ -13,7 +13,7 @@ export interface SmmConfig {
   showNameWithLogo?: boolean;
   og?: OpenGraph;
   sortRoutes?: boolean;
-  trimIndex?: boolean;
+  trimIndexFromPath?: boolean;
   version?: string;
   fonts?: {
     title?: {
@@ -27,7 +27,7 @@ export interface SmmConfig {
     mono?: {
       name: string;
       url?: string;
-    }
+    };
   };
 }
 

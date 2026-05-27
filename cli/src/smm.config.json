@@ -4,17 +4,17 @@
   "baseRoute": "/",
   "defaultTheme": "dark",
   "markdownItOptions": {
-    "html":         true,
-    "xhtmlOut":     true,
-    "breaks":       true,
-    "langPrefix":   "language-",
-    "linkify":      true,
-    "typographer":  false
+    "html": true,
+    "xhtmlOut": true,
+    "breaks": true,
+    "langPrefix": "language-",
+    "linkify": true,
+    "typographer": false
   },
   "favicon": "",
   "logo": "",
   "name": "Serve My MD",
   "showNameWithLogo": true,
   "sortRoutes": true,
-  "trimIndex": false
+  "trimIndexFromPath": false
 }

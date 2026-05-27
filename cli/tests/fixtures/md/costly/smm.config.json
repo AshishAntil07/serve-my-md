@@ -5,7 +5,7 @@
   "publicPath": "/static",
   "defaultTheme": "light",
   "name": "Costly Store",
-  "trimIndex": true,
+  "trimIndexFromPath": true,
   "fonts": {
     "title": {
       "name": "Consolas"

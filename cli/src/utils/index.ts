@@ -51,24 +51,28 @@ export async function FileOrDirectoryExists(
   }
 }
 
+/**
+ * needs to slugify the returned paths
+ */
 export function makeRoutesOfNestedPaths(
   nestedPaths: NestedPair<string>[],
   prefix: string = "/",
 ): string[] {
   return nestedPaths.reduce((acc, [path, children]) => {
     const isGrouper = path.startsWith("(") && path.endsWith(")");
+    const slugified = slugify(path);
 
     return [
       ...acc,
-      ...((isGrouper || !children)?[]:[prefix+path]),
+      ...((isGrouper || !children)?[]:[prefix+slugified]),
       ...(children
         ? makeRoutesOfNestedPaths(
             children,
-            prefix + (!isGrouper ? path + "/" : ""),
+            prefix + (!isGrouper ? slugified + "/" : ""),
           )
         : isGrouper
           ? []
-          : [prefix + path]),
+          : [prefix + slugified]),
     ];
   }, [] as string[]);
 }

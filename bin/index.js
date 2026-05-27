@@ -52,13 +52,14 @@ async function FileOrDirectoryExists(filepath) {
 function makeRoutesOfNestedPaths(nestedPaths, prefix = "/") {
   return nestedPaths.reduce((acc, [path4, children]) => {
     const isGrouper = path4.startsWith("(") && path4.endsWith(")");
+    const slugified = slugify(path4);
     return [
       ...acc,
-      ...isGrouper || !children ? [] : [prefix + path4],
+      ...isGrouper || !children ? [] : [prefix + slugified],
       ...children ? makeRoutesOfNestedPaths(
         children,
-        prefix + (!isGrouper ? path4 + "/" : "")
-      ) : isGrouper ? [] : [prefix + path4]
+        prefix + (!isGrouper ? slugified + "/" : "")
+      ) : isGrouper ? [] : [prefix + slugified]
     ];
   }, []);
 }
@@ -107,7 +108,6 @@ program.option("-i, --interactive", "Enable interactive mode");
 if (process.env.VITEST) {
   program.option("--skip-build", "Skip the build step");
 }
-console.log("vitest", process.env.VITEST);
 program.parse(process.argv);
 var options = program.opts();
 if (options.interactive || options.directory === void 0) {
@@ -189,12 +189,12 @@ async function getMarkdownFiles(baseUrl, pairChildren) {
       if (bwrapper && !awrapper) return -1;
       return a[0].localeCompare(b[0]);
     });
-  const filess = finalConfig.trimIndex ? (await Promise.all(promises)).flat().map((val) => trimIndexFromPath(val)) : (await Promise.all(promises)).flat();
+  const filess = finalConfig.trimIndexFromPath ? (await Promise.all(promises)).flat().map((val) => trimIndexFromPath(val)) : (await Promise.all(promises)).flat();
   return pairChildren ? filess : { nestedPaths, files: filess };
 }
 function cleanNestedPaths(nestedPaths) {
   for (const pair of nestedPaths) {
-    if (finalConfig.trimIndex) {
+    if (finalConfig.trimIndexFromPath) {
       pair[0] = trimIndexFromPath(pair[0]);
     }
     if (pair[1]) {
@@ -250,7 +250,7 @@ var smm_config_default = {
   name: "Serve My MD",
   showNameWithLogo: true,
   sortRoutes: true,
-  trimIndex: false
+  trimIndexFromPath: false
 };
 
 // cli/src/shared.ts
@@ -283,7 +283,7 @@ import { fileURLToPath } from "url";
 import { build as viteBuild } from "vite";
 import { mkdirSync } from "fs";
 async function build(options2) {
-  const skipBuild = options2.skipBuild ?? false;
+  const skipBuild = ("skipBuild" in options2 && options2.skipBuild) ?? false;
   const { nestedPaths, files: markdownFiles } = await getMarkdownFiles(
     options2.directory
   );
@@ -349,7 +349,6 @@ async function build(options2) {
       Logger.error(`Public path "${finalConfig.publicPath}" does not exist!`);
     }
   }
-  console.log(skipBuild);
   if (!skipBuild) {
     Logger.log("Building the app...");
     await viteBuild({
@@ -369,8 +368,7 @@ async function build(options2) {
 
 // cli/src/index.ts
 if (await build(options)) {
-  Logger.log("Build completed successfully.");
+  Logger.log("Completed successfully.");
 } else {
-  Logger.error("Build failed.");
+  Logger.error("Failed.");
 }
-//# sourceMappingURL=index.js.map

@@ -5,7 +5,7 @@
   "defaultTheme": "light",
   "name": "Ghostly Store",
   "version": "1.0.0 LTS",
-  "trimIndex": true,
+  "trimIndexFromPath": true,
   "fonts": {
     "title": {
       "name": "Sorts Mill Goudy",
