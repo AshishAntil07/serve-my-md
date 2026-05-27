@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // cli/src/lib/logger.ts
 var Logger = class {
   static log(message, type) {

@@ -1,6 +1,7 @@
 /.yarn/unplugged
 /.yarn/releases
 /bin
+/node_modules
 
 /tests/fixtures/md/*/dist
 /tests/fixtures/md/*/.ss
