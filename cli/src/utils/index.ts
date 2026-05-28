@@ -51,9 +51,6 @@ export async function FileOrDirectoryExists(
   }
 }
 
-/**
- * needs to slugify the returned paths
- */
 export function makeRoutesOfNestedPaths(
   nestedPaths: NestedPair<string>[],
   prefix: string = "/",
@@ -73,6 +70,29 @@ export function makeRoutesOfNestedPaths(
         : isGrouper
           ? []
           : [prefix + slugified]),
+    ];
+  }, [] as string[]);
+}
+
+/**
+ * Only useful for getting accurate paths of markdown files as is, but **before** cleaning the nestedPaths.
+ * 
+ * If you wanna get a clean path resembling final route, use the function without "Raw" postfix.
+ */
+export function makeRoutesOfNestedPathsRaw(
+  nestedPaths: NestedPair<string>[],
+  prefix: string = "/",
+): string[] {
+  return nestedPaths.reduce((acc, [path, children]) => {
+
+    return [
+      ...acc,
+      ...(children
+        ? makeRoutesOfNestedPathsRaw(
+            children,
+            prefix + path + "/"
+          )
+        : [prefix + path]),
     ];
   }, [] as string[]);
 }

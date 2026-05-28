@@ -65,6 +65,17 @@ function makeRoutesOfNestedPaths(nestedPaths, prefix = "/") {
     ];
   }, []);
 }
+function makeRoutesOfNestedPathsRaw(nestedPaths, prefix = "/") {
+  return nestedPaths.reduce((acc, [path4, children]) => {
+    return [
+      ...acc,
+      ...children ? makeRoutesOfNestedPathsRaw(
+        children,
+        prefix + path4 + "/"
+      ) : [prefix + path4]
+    ];
+  }, []);
+}
 function ogToHtml(og) {
   const tags = [];
   for (const [key, value] of Object.entries(og)) {
@@ -173,18 +184,20 @@ async function getMarkdownFiles(baseUrl, pairChildren) {
     if (shouldIgnore(filePath.slice(options.directory.length)) || filePath.slice(options.directory.length) === finalConfig.publicPath)
       continue;
     if (file.isDirectory()) {
-      const dirPair = [cleanName(file.name), []];
+      const dirPair = [file.name, []];
       nestedPaths.push(dirPair);
       promises.push(
         getMarkdownFiles(filePath, dirPair[1])
       );
     } else if (file.name.endsWith(".md")) {
-      nestedPaths.push([cleanName(file.name), null]);
+      nestedPaths.push([file.name, null]);
       promises.push(Promise.resolve([filePath]));
     }
   }
   if (finalConfig.sortRoutes)
     nestedPaths.sort((a, b) => {
+      if (a[0] === "index.md") return -1;
+      if (b[0] === "index.md") return 1;
       const awrapper = a[0].startsWith("(") && a[0].endsWith(")");
       const bwrapper = b[0].startsWith("(") && b[0].endsWith(")");
       if (awrapper && !bwrapper) return 1;
@@ -196,6 +209,7 @@ async function getMarkdownFiles(baseUrl, pairChildren) {
 }
 function cleanNestedPaths(nestedPaths) {
   for (const pair of nestedPaths) {
+    pair[0] = cleanName(pair[0]);
     if (finalConfig.trimIndexFromPath) {
       pair[0] = trimIndexFromPath(pair[0]);
     }
@@ -289,12 +303,12 @@ async function build(options2) {
   const { nestedPaths, files: markdownFiles } = await getMarkdownFiles(
     options2.directory
   );
-  cleanNestedPaths(nestedPaths);
   const parsePromises = [];
   Logger.log("Processing routes...");
-  for (const file of markdownFiles) {
-    parsePromises.push(parseMD(file));
+  for (const file of makeRoutesOfNestedPathsRaw(nestedPaths)) {
+    parsePromises.push(parseMD(path3.join(options2.directory, file)));
   }
+  cleanNestedPaths(nestedPaths);
   const groupedRoutes = Object.groupBy(
     await Promise.all(parsePromises),
     (route) => route.path

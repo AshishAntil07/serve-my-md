@@ -5,6 +5,7 @@ import type { Route, Out, NestedPair } from "@shared/index.js";
 import {
   FileOrDirectoryExists,
   makeRoutesOfNestedPaths,
+  makeRoutesOfNestedPathsRaw,
   optional,
 } from "@/utils/index.js";
 import { cp, writeFile } from "fs/promises";
@@ -25,13 +26,15 @@ export default async function build(options: Args): Promise<boolean> {
   const { nestedPaths, files: markdownFiles } = (await getMarkdownFiles(
     options.directory,
   )) as { nestedPaths: NestedPair<string>[]; files: string[] };
-  cleanNestedPaths(nestedPaths);
 
   const parsePromises: Promise<Route>[] = [];
   logger.log("Processing routes...");
-  for (const file of markdownFiles) {
-    parsePromises.push(parseMD(file));
+  for (const file of makeRoutesOfNestedPathsRaw(nestedPaths)) {
+    parsePromises.push(parseMD(path.join(options.directory, file)));
   }
+
+  cleanNestedPaths(nestedPaths);
+
 
   const groupedRoutes = Object.groupBy(
     await Promise.all(parsePromises),

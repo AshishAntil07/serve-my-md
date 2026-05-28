@@ -86,19 +86,22 @@ export async function getMarkdownFiles(
       continue;
 
     if (file.isDirectory()) {
-      const dirPair: NestedPair<string> = [cleanName(file.name), []];
+      const dirPair: NestedPair<string> = [file.name, []];
       nestedPaths.push(dirPair);
       promises.push(
         getMarkdownFiles(filePath, dirPair[1] as NestedPair<string>[]),
       );
     } else if (file.name.endsWith(".md")) {
-      nestedPaths.push([cleanName(file.name), null]);
+      nestedPaths.push([file.name, null]);
       promises.push(Promise.resolve([filePath]));
     }
   }
 
   if (finalConfig.sortRoutes)
     nestedPaths.sort((a, b) => {
+      if(a[0] === "index.md") return -1;
+      if(b[0] === "index.md") return 1;
+
       const awrapper = a[0].startsWith("(") && a[0].endsWith(")");
       const bwrapper = b[0].startsWith("(") && b[0].endsWith(")");
 
@@ -119,6 +122,7 @@ export async function getMarkdownFiles(
 
 export function cleanNestedPaths(nestedPaths: NestedPair<string>[]): void {
   for (const pair of nestedPaths) {
+    pair[0] = cleanName(pair[0]);
     if (finalConfig.trimIndexFromPath) {
       pair[0] = trimIndexFromPath(pair[0]);
     }

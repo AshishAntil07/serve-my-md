@@ -1,7 +1,7 @@
-import { ogToHtml, slugify, trimIndexFromPath } from "@/utils/index.js";
-import { assert, describe, test } from "vitest";
+import { cleanName, makeRoutesOfNestedPaths, makeRoutesOfNestedPathsRaw, ogToHtml, slugify, trimIndexFromPath } from "@/utils/index.js";
+import { assert, describe, expect, test } from "vitest";
 import testcases from "../fixtures/cases/utils.unit.json" with { type: "json" };
-import type { OpenGraph } from "@/types/og.js";
+import { deepStrictEqual, strictEqual } from "assert";
 
 const tests = [
   {
@@ -16,14 +16,26 @@ const tests = [
     cases: testcases.ogToHtml,
     func: ogToHtml,
   },
+  {
+    cases: testcases.makeRoutesOfNestedPaths,
+    func: makeRoutesOfNestedPaths,
+  },
+  {
+    cases: testcases.cleanName,
+    func: cleanName
+  },
+  {
+    cases: testcases.makeRoutesOfNestedPathsRaw,
+    func: makeRoutesOfNestedPathsRaw
+  }
 ];
 
 describe("@/utils", () => {
   for(const { cases, func } of tests)
     test(func.name, () => {
       for (const { input, output } of cases) {
-        const result = func(input as string & OpenGraph);
-        assert(result === output, `Failed on input: ${JSON.stringify(input)}\nReceived: ${JSON.stringify(result)}\nExpected: ${JSON.stringify(output)}`);
+        const result = func(input as any);
+        expect(result).toStrictEqual(output);
       }
     });
 });
