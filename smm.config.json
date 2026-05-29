@@ -1,0 +1,22 @@
+{
+  "rootTitle": "Serve My MD Docs",
+  "description": "Docs for serve-my-md.",
+  "baseRoute": "/",
+  "defaultTheme": "dark",
+  "sortRoutes": true,
+  "trimIndexFromPath": true,
+  "fonts": {
+    "mono": {
+      "name": "Fira Code",
+      "url": "https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap"
+    },
+    "title": {
+      "name": "Exo",
+      "url": "https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,100..900;1,100..900&display=swap"
+    },
+    "body": {
+      "name": "Commissioner",
+      "url": "https://fonts.googleapis.com/css2?family=Commissioner:wght@100..900&display=swap"
+    }
+  }
+}
