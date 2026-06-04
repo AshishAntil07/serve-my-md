@@ -1,15 +1,17 @@
-import {  clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-import type {ClassValue} from 'clsx';
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+import type { ClassValue } from 'clsx';
 import type React from 'react';
 
 export function cn(...inputs: Array<ClassValue>) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
-export function extractText(html: string): {targetElement: HTMLElement, text: string}[] {
+export function extractText(
+  html: string
+): { targetElement: HTMLElement; text: string }[] {
   const template = document.createElement('div');
-  template.classList.add("template");
+  template.classList.add('template');
   template.innerHTML = html;
 
   const flattened = flatDom([template]);
@@ -26,8 +28,12 @@ export function flatDom(elements: HTMLElement[]): HTMLElement[] {
   }, [] as HTMLElement[]);
 }
 
-export function getTitleFromExtraction(extraction: ReturnType<typeof extractText>): string {
-  const title = extraction.find(({ targetElement }) => targetElement.tagName === 'H1');
+export function getTitleFromExtraction(
+  extraction: ReturnType<typeof extractText>
+): string {
+  const title = extraction.find(
+    ({ targetElement }) => targetElement.tagName === 'H1'
+  );
 
   return title?.text || '';
 }
@@ -48,28 +54,31 @@ export function markElements(root: HTMLElement) {
   markElementsFromExtraction(flatDom([root]));
 }
 
-export function markElementsFromExtraction(extraction: ReturnType<typeof extractText> | ReturnType<typeof flatDom>) {
+export function markElementsFromExtraction(
+  extraction: ReturnType<typeof extractText> | ReturnType<typeof flatDom>
+) {
   extraction.forEach((el, index) => {
     const element = 'targetElement' in el ? el.targetElement : el;
     if (element.textContent) {
-      if(headings.includes(element.tagName.toUpperCase())) {
-        element.id = slugify(element.textContent);
-      } else {
-        element.setAttribute("data-label", index.toString());
-      }
+      element.setAttribute('data-label', index.toString());
     }
   });
 }
 
-export function highlightSubstring(text: string, substring: string): React.ReactNode[] {
-  if(!substring) return [text];
+export function highlightSubstring(
+  text: string,
+  substring: string
+): React.ReactNode[] {
+  if (!substring) return [text];
 
   const result: React.ReactNode[] = [];
-  let occurrence = -1, prev = 0;
+  let occurrence = -1,
+    prev = 0;
 
-  const lowercaseText = text.toLowerCase(), lowercaseSubstring = substring.toLowerCase();
+  const lowercaseText = text.toLowerCase(),
+    lowercaseSubstring = substring.toLowerCase();
 
-  while((occurrence = lowercaseText.indexOf(lowercaseSubstring, prev)) + 1) {
+  while ((occurrence = lowercaseText.indexOf(lowercaseSubstring, prev)) + 1) {
     result.push(text.slice(prev, occurrence));
     prev = occurrence + substring.length;
     result.push(<mark key={occurrence}>{text.slice(occurrence, prev)}</mark>);

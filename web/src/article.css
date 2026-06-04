@@ -4,7 +4,19 @@
 .main-article {
   h1,h2,h3,h4 {
     font-family: var(--font-title);
+    @apply mt-4;
   }
+
+  h1::before, h2::before, h3::before, h4::before {
+    translate: calc(-100% - 5px);
+    transition: opacity .2s;
+    @apply content-['#'] absolute opacity-0 text-muted-foreground font-semibold;
+  }
+
+  h1:hover::before, h2:hover::before, h3:hover::before, h4:hover::before {
+    @apply opacity-100;
+  }
+
 
   h1 {
     @apply text-4xl font-bold mb-4;
@@ -104,13 +116,17 @@
     }
   }
 
+  pre {
+    @apply  text-sm font-mono;
+  }
+
   section.footnotes {
+    @apply mt-4 p-4;
+
     &:before {
       @apply content-['Footnotes'] block text-2xl font-semibold mb-4;
       font-family: var(--font-title);
     }
-
-    @apply mt-4 p-4
   }
 
   blockquote {
@@ -144,6 +160,14 @@
 
     th, td {
       @apply border border-border;
+    }
+  }
+
+  .heading-anchor {
+    @apply no-underline text-inherit decoration-muted-foreground decoration-2 underline-offset-4 decoration-dotted;
+
+    &:hover {
+      @apply underline;
     }
   }
 

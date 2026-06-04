@@ -9,7 +9,7 @@ import IntentLink from './IntentLink';
 import { Kbd } from './ui/kbd';
 import { SidebarTrigger } from './ui/sidebar';
 import { useIsMobile } from '@/hooks/useMobile';
-import { markElements } from '@/lib/utils';
+import { markElements, slugify } from '@/lib/utils';
 import Search from './Search';
 import ThemeSwitch from './ThemeSwitcher';
 
@@ -68,8 +68,18 @@ export default function Rendrer({
     });
 
     markElements(article);
+    article.querySelectorAll('h1,h2,h3,h4').forEach((element) => {
+      element.id = slugify(element.textContent);
 
-    Prism.highlightAllUnder(article, true);
+      const a = document.createElement('a');
+      a.href = `#${element.id}`;
+      a.classList.add('heading-anchor');
+      a.innerHTML = element.innerHTML;
+      element.innerHTML = '';
+      element.appendChild(a);
+    });
+
+    // Prism.highlightAllUnder(article, true);
   }, [articleRef.current]);
 
   return (
@@ -103,7 +113,9 @@ export default function Rendrer({
                 </IntentLink>
               </Button>
             </>
-          ) : <span></span>}
+          ) : (
+            <span></span>
+          )}
           {next ? (
             <>
               <Button variant="outline" asChild ref={nextRef}>
@@ -112,7 +124,9 @@ export default function Rendrer({
                 </IntentLink>
               </Button>
             </>
-          ) : <span></span>}
+          ) : (
+            <span></span>
+          )}
         </div>
       </main>
     </>

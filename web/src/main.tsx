@@ -8,16 +8,18 @@ import {
   createRouter
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
-
 import '@/styles.css';
-import type { AppRoute } from '@/types/index.ts';
-import type { NestedPair } from '@shared/index';
-import reportWebVitals from '@/reportWebVitals.ts';
+import type { AppRoute } from '@/types';
+import type { RouteTree } from '@shared/index';
+import reportWebVitals from '@/reportWebVitals';
 import App from '@/App.tsx';
-import Rendrer from '@/components/Rendrer.tsx';
-import { SidebarProvider } from '@/components/ui/sidebar.tsx';
+import Rendrer from '@/components/Rendrer';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { pathsContext } from '@/contexts';
-import Fonts from '@/components/Fonts.tsx';
+import Fonts from '@/components/Fonts';
+import constants from "@shared/constants.json" with { type: "json" };
+
+const STATIC_TEMP_CONTENT_PREFIX = constants.STATIC_TEMP_CONTENT_PREFIX;
 
 import out from '@/.generated/output.json' with { type: 'json' };
 import paths from '@/.generated/paths.json' with { type: 'json' };
@@ -25,7 +27,7 @@ import paths from '@/.generated/paths.json' with { type: 'json' };
 const rootRoute = createRootRoute({
   component: () => (
     <>
-      <pathsContext.Provider value={paths as Array<NestedPair<string>>}>
+      <pathsContext.Provider value={paths as Array<RouteTree>}>
         <SidebarProvider>
           <App>
             <Outlet />
@@ -74,15 +76,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
+// Just a safe side in case the code below this one doesn't run;
+setTimeout(() => {
+  document.body.classList.remove("loading");
+}, 10000);
+
 const rootElement = document.getElementById('app');
-if (rootElement && !rootElement.innerHTML) {
+if (rootElement && (!rootElement.innerHTML || rootElement.innerText.startsWith(STATIC_TEMP_CONTENT_PREFIX))) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
       <RouterProvider router={router} />
     </StrictMode>
   );
+
+  document.body.classList.remove("loading");
 }
+
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

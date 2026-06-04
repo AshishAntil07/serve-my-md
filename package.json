@@ -57,6 +57,7 @@
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "vite": "^7.1.7",
+    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.0.15",
     "web-vitals": "^5.1.0"
   },
@@ -79,6 +80,7 @@
     "markdown-it": "^14.1.1",
     "markdown-it-footnote": "^4.0.0",
     "markdown-it-github-headings": "^2.0.1",
+    "markdown-it-prism": "^3.0.1",
     "markdown-it-task-lists": "^2.1.1",
     "minimatch": "^10.2.0",
     "prismjs": "^1.30.0",

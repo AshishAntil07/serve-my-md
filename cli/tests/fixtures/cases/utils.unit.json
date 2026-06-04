@@ -47,8 +47,16 @@
   "makeRoutesOfNestedPathsRaw": [
     {
       "input": [
-        ["Hello", null],
-        ["world", null]
+        {
+          "label": "Hello",
+          "children": null,
+          "pathSegment": "Hello"
+        },
+        {
+          "label": "world",
+          "children": null,
+          "pathSegment": "world"
+        }
       ],
       "output": [
         "/Hello", "/world"
@@ -56,11 +64,27 @@
     },
     {
       "input": [
-        ["bl og", [
-          ["post1.md", null],
-          ["post2.md", null]
-        ]],
-        ["about.md", null]
+        {
+          "label": "bl og",
+          "children": [
+            {
+              "label": "post1.md",
+              "children": null,
+              "pathSegment": "post1.md"
+            },
+            {
+              "label": "post2.md",
+              "children": null,
+              "pathSegment": "post2.md"
+            }
+          ],
+          "pathSegment": "bl og"
+        },
+        {
+          "label": "about.md",
+          "children": null,
+          "pathSegment": "about.md"
+        }
       ],
       "output": [
         "/bl og/post1.md",
@@ -72,8 +96,16 @@
   "makeRoutesOfNestedPaths": [
     {
       "input": [
-        ["1. Hello", null],
-        ["2. world", null]
+        {
+          "label": "1. Hello",
+          "children": null,
+          "pathSegment": "1-hello"
+        },
+        {
+          "label": "2. world",
+          "children": null,
+          "pathSegment": "2-world"
+        }
       ],
       "output": [
         "/1-hello",
@@ -82,16 +114,45 @@
     },
     {
       "input": [
-        ["(bl o_G)", [
-          ["1. post1", null],
-          ["2. post2", null]
-        ]],
-        ["3. about", null]
+        {
+          "label": "bl o_G",
+          "children": [
+            {
+              "label": "1. post1",
+              "children": null,
+              "pathSegment": "1-post1"
+            },
+            {
+              "label": "2. post2",
+              "children": null,
+              "pathSegment": "2-post2"
+            }
+          ],
+          "pathSegment": "(bl-o-g)",
+          "isGrouper": true
+        },
+        {
+          "label": "3. about",
+          "children": null,
+          "pathSegment": "3-about"
+        }
       ],
       "output": [
         "/1-post1",
         "/2-post2",
         "/3-about"
+      ]
+    },
+    {
+      "input": [
+        {
+          "label": "Home",
+          "children": null,
+          "pathSegment": ""
+        }
+      ],
+      "output": [
+        "/"
       ]
     }
   ]

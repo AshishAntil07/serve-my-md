@@ -1,23 +1,25 @@
 import fs from "fs/promises";
 import type { OpenGraph } from "@/types/og.js";
-import type { NestedPair, Route } from "@shared/index.js";
+import type { RouteTree } from "@shared/index.js";
 
 const indexTokens = "1234567890.";
 
 export function trimIndexFromPath(filePath: string): string {
-  let offset = filePath.lastIndexOf("/") + 1;
-  let encountered = false;
-  while (
-    offset < filePath.length &&
-    (indexTokens.includes(filePath[offset]!) ||
-      (filePath[offset] === " " && !encountered))
-  )
-    if (filePath[offset++] !== " ") encountered = true;
+  return filePath.split("/").map((segment) => {
+    let offset = 0;
+    let encountered = false;
 
-  return (
-    filePath.slice(0, filePath.lastIndexOf("/") + 1) +
-    filePath.slice(offset).trim()
-  );
+    while (
+      offset < segment.length &&
+      (indexTokens.includes(segment[offset]!) ||
+        (segment[offset] === " " && !encountered))
+    )
+      if (segment[offset++] !== " ") encountered = true;
+
+    return (
+      segment.slice(offset).trim()
+    );
+  }).join('/');
 }
 
 export function cleanName(filename: string): string {
@@ -52,24 +54,22 @@ export async function FileOrDirectoryExists(
 }
 
 export function makeRoutesOfNestedPaths(
-  nestedPaths: NestedPair<string>[],
+  nestedPaths: RouteTree[],
   prefix: string = "/",
 ): string[] {
-  return nestedPaths.reduce((acc, [path, children]) => {
-    const isGrouper = path.startsWith("(") && path.endsWith(")");
-    const slugified = slugify(path);
+  return nestedPaths.reduce((acc, { pathSegment, children, isGrouper }) => {
 
     return [
       ...acc,
-      ...((isGrouper || !children)?[]:[prefix+slugified]),
+      ...((isGrouper || !children)?[]:[prefix+pathSegment]),
       ...(children
         ? makeRoutesOfNestedPaths(
             children,
-            prefix + (!isGrouper ? slugified + "/" : ""),
+            prefix + (!isGrouper ? pathSegment + "/" : ""),
           )
         : isGrouper
           ? []
-          : [prefix + slugified]),
+          : [prefix + pathSegment]),
     ];
   }, [] as string[]);
 }
@@ -80,19 +80,19 @@ export function makeRoutesOfNestedPaths(
  * If you wanna get a clean path resembling final route, use the function without "Raw" postfix.
  */
 export function makeRoutesOfNestedPathsRaw(
-  nestedPaths: NestedPair<string>[],
+  nestedPaths: RouteTree[],
   prefix: string = "/",
 ): string[] {
-  return nestedPaths.reduce((acc, [path, children]) => {
+  return nestedPaths.reduce((acc, { pathSegment, children }) => {
 
     return [
       ...acc,
       ...(children
         ? makeRoutesOfNestedPathsRaw(
             children,
-            prefix + path + "/"
+            prefix + pathSegment + "/"
           )
-        : [prefix + path]),
+        : [prefix + pathSegment]),
     ];
   }, [] as string[]);
 }

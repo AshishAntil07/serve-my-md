@@ -30,39 +30,36 @@ export default function Sidebar() {
       pairs: typeof paths,
       prefix: string
     ): Array<JSX.Element | null> => {
-      return pairs.map(([name, children]) => {
-        if (prefix !== '/' && !name) return null;
-        if (name.startsWith('(') && name.endsWith(')')) {
-          const groupName = name.slice(1, -1);
-          return (
-            <div key={groupName} title={groupName} className="px-2 mt-2">
-              <span className="text-sm text-muted-foreground">{groupName}</span>
-              <div className="flex flex-col gap-2 px-1">
-                {buildLinks(children!, prefix)}
+      return pairs.map(({label, children, isGrouper, pathSegment}, i) => {
+        if (prefix !== '/' && !label) return null;
+
+        return children ? isGrouper ? (
+            <div key={i} title={label} className="pl-2 mt-2">
+              <span className="text-sm text-muted-foreground pr-2">{label}</span>
+              <div className="flex flex-col gap-0 pl-1">
+                {buildLinks(children, prefix)}
               </div>
             </div>
-          );
-        }
-
-        return children ? (
-          <Collapsible key={name} className="">
+          ) : (
+          <Collapsible key={i}>
             <CollapsibleTrigger className="flex justify-between w-full font-body">
-              <IntentLink to={prefix + '/' + name} className="px-2 py-0.5">
-                {name || 'Home'}
+              <IntentLink to={prefix + '/' + pathSegment} className="px-2 py-0.5">
+                {label || 'Home'}
               </IntentLink>
               <ChevronsUpDown className="w-4 text-muted-foreground" />
             </CollapsibleTrigger>
 
             <CollapsibleContent style={{ paddingLeft: '0.75em' }}>
-              {buildLinks(children, prefix + '/' + name)}
+              {buildLinks(children, prefix + '/' + pathSegment)}
             </CollapsibleContent>
           </Collapsible>
         ) : (
           <IntentLink
-            to={prefix + '/' + name}
+            key={i}
+            to={prefix + '/' + pathSegment}
             className="block px-2 py-0.5 font-body"
           >
-            {name || 'Home'}
+            {label || 'Home'}
           </IntentLink>
         );
       });

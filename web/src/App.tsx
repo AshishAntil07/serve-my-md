@@ -1,5 +1,6 @@
 import Sidebar from '@/components/Sidebar';
 import '@/article.css';
+import "prismjs/themes/prism-okaidia.css";
 
 function App({ children }: { children: React.ReactNode }) {
 

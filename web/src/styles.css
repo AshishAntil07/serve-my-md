@@ -10,6 +10,7 @@ body {
 
 * {
   transition: outline .1s;
+  scroll-behavior: smooth;
   
   &:focus {
     outline: 3px solid rgb(46, 119, 229);

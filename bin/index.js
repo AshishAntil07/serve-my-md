@@ -24,11 +24,13 @@ import { minimatch } from "minimatch";
 import fs from "fs/promises";
 var indexTokens = "1234567890.";
 function trimIndexFromPath(filePath) {
-  let offset = filePath.lastIndexOf("/") + 1;
-  let encountered = false;
-  while (offset < filePath.length && (indexTokens.includes(filePath[offset]) || filePath[offset] === " " && !encountered))
-    if (filePath[offset++] !== " ") encountered = true;
-  return filePath.slice(0, filePath.lastIndexOf("/") + 1) + filePath.slice(offset).trim();
+  return filePath.split("/").map((segment) => {
+    let offset = 0;
+    let encountered = false;
+    while (offset < segment.length && (indexTokens.includes(segment[offset]) || segment[offset] === " " && !encountered))
+      if (segment[offset++] !== " ") encountered = true;
+    return segment.slice(offset).trim();
+  }).join("/");
 }
 function cleanName(filename) {
   return filename === "index.md" ? "" : filename.replace(/\.md$/, "");
@@ -52,27 +54,25 @@ async function FileOrDirectoryExists(filepath) {
   }
 }
 function makeRoutesOfNestedPaths(nestedPaths, prefix = "/") {
-  return nestedPaths.reduce((acc, [path4, children]) => {
-    const isGrouper = path4.startsWith("(") && path4.endsWith(")");
-    const slugified = slugify(path4);
+  return nestedPaths.reduce((acc, { pathSegment, children, isGrouper }) => {
     return [
       ...acc,
-      ...isGrouper || !children ? [] : [prefix + slugified],
+      ...isGrouper || !children ? [] : [prefix + pathSegment],
       ...children ? makeRoutesOfNestedPaths(
         children,
-        prefix + (!isGrouper ? slugified + "/" : "")
-      ) : isGrouper ? [] : [prefix + slugified]
+        prefix + (!isGrouper ? pathSegment + "/" : "")
+      ) : isGrouper ? [] : [prefix + pathSegment]
     ];
   }, []);
 }
 function makeRoutesOfNestedPathsRaw(nestedPaths, prefix = "/") {
-  return nestedPaths.reduce((acc, [path4, children]) => {
+  return nestedPaths.reduce((acc, { pathSegment, children }) => {
     return [
       ...acc,
       ...children ? makeRoutesOfNestedPathsRaw(
         children,
-        prefix + path4 + "/"
-      ) : [prefix + path4]
+        prefix + pathSegment + "/"
+      ) : [prefix + pathSegment]
     ];
   }, []);
 }
@@ -132,6 +132,15 @@ if (options.interactive || options.directory === void 0) {
 }
 
 // cli/src/core/index.ts
+import { readdirSync } from "fs";
+
+// shared/constants.json
+var constants_default = {
+  STATIC_TEMP_CONTENT_PREFIX: "__smm_static_temp_content__"
+};
+
+// cli/src/core/index.ts
+var STATIC_TEMP_CONTENT_PREFIX = constants_default.STATIC_TEMP_CONTENT_PREFIX;
 async function readConfig(filepath) {
   try {
     const data = JSON.parse(await fs2.readFile(filepath, "utf-8"));
@@ -177,52 +186,64 @@ async function parseSmmIgnore(filePath) {
 }
 async function getMarkdownFiles(baseUrl, pairChildren) {
   const files = await fs2.readdir(baseUrl, { withFileTypes: true });
-  const nestedPaths = pairChildren || [];
+  const routeTree = pairChildren || [];
   const promises = [];
   for (const file of files) {
     const filePath = path.join(baseUrl, file.name);
     if (shouldIgnore(filePath.slice(options.directory.length)) || filePath.slice(options.directory.length) === finalConfig.publicPath)
       continue;
     if (file.isDirectory()) {
-      const dirPair = [file.name, []];
-      nestedPaths.push(dirPair);
+      const isGrouper = file.name.startsWith("(") && file.name.endsWith(")");
+      const dirPair = {
+        label: isGrouper ? file.name.slice(1, -1) : file.name,
+        children: [],
+        pathSegment: file.name,
+        isGrouper
+      };
+      routeTree.push(dirPair);
       promises.push(
-        getMarkdownFiles(filePath, dirPair[1])
+        getMarkdownFiles(filePath, dirPair.children)
       );
     } else if (file.name.endsWith(".md")) {
-      nestedPaths.push([file.name, null]);
+      routeTree.push({
+        label: file.name,
+        children: null,
+        pathSegment: file.name
+      });
       promises.push(Promise.resolve([filePath]));
     }
   }
   if (finalConfig.sortRoutes)
-    nestedPaths.sort((a, b) => {
-      if (a[0] === "index.md") return -1;
-      if (b[0] === "index.md") return 1;
-      const awrapper = a[0].startsWith("(") && a[0].endsWith(")");
-      const bwrapper = b[0].startsWith("(") && b[0].endsWith(")");
-      if (awrapper && !bwrapper) return 1;
-      if (bwrapper && !awrapper) return -1;
-      return a[0].localeCompare(b[0]);
+    routeTree.sort((a, b) => {
+      if (a.label === "index.md") return -1;
+      if (b.label === "index.md") return 1;
+      if (a.isGrouper && !b.isGrouper) return 1;
+      if (b.isGrouper && !a.isGrouper) return -1;
+      return a.label.localeCompare(b.label);
     });
   const filess = finalConfig.trimIndexFromPath ? (await Promise.all(promises)).flat().map((val) => trimIndexFromPath(val)) : (await Promise.all(promises)).flat();
-  return pairChildren ? filess : { nestedPaths, files: filess };
+  return pairChildren ? filess : { routeTree, files: filess };
 }
-function cleanNestedPaths(nestedPaths) {
-  for (const pair of nestedPaths) {
-    pair[0] = cleanName(pair[0]);
+function cleanNestedPaths(routeTree) {
+  for (const pair of routeTree) {
     if (finalConfig.trimIndexFromPath) {
-      pair[0] = trimIndexFromPath(pair[0]);
+      pair.label = trimIndexFromPath(pair.label);
     }
-    if (pair[1]) {
-      cleanNestedPaths(pair[1]);
-      if (pair[1]?.length === 1 && pair[1]?.[0]?.[0] === "") {
-        pair[1] = null;
+    pair.label = cleanName(pair.label);
+    pair.pathSegment = getPath(cleanName(pair.pathSegment)).replaceAll("/", "");
+    if (pair.children) {
+      cleanNestedPaths(pair.children);
+      if (pair.children?.length === 1 && ["", "index.md"].includes(pair.children?.[0]?.label)) {
+        pair.children = null;
       }
     }
   }
 }
 function getPath(filepath) {
-  const transformedPath = filepath.replace(options.directory, "").replace(/\\/g, "/").replace(/\/index.md$/, "").replace(/\.md$/, "");
+  let transformedPath = filepath.replace(options.directory, "").replace(/\\/g, "/").replace(/\/index.md$/, "").replace(/\.md$/, "");
+  if (finalConfig.trimIndexFromPath) {
+    transformedPath = trimIndexFromPath(transformedPath);
+  }
   return slugify(transformedPath).split("/").filter((s) => !(s.startsWith("(") && s.endsWith(")"))).join("/") || "/";
 }
 async function parseMD(filepath) {
@@ -232,18 +253,86 @@ async function parseMD(filepath) {
     content: mdParser.render(await fs2.readFile(filepath, "utf-8"))
   };
 }
-async function generateHtml() {
+async function generateHtml(distDir, routeContent) {
   try {
-    const htmlTemplate = await fs2.readFile(
+    let htmlTemplate = await fs2.readFile(
       path.join(import.meta.dirname, "..", "index.html"),
       "utf-8"
     );
-    return htmlTemplate.replace("{{og}}", ogToHtml(finalConfig.og ?? {})).replace("{{title}}", finalConfig.rootTitle ?? "Serve My MD").replace("{{description}}", finalConfig.description ?? "").replace("{{favicon}}", finalConfig.favicon ?? "").replace(
+    const commentStart = htmlTemplate.indexOf("<!--");
+    htmlTemplate = htmlTemplate.replace(
+      htmlTemplate.slice(
+        commentStart,
+        htmlTemplate.indexOf("-->", commentStart) + 3
+      ),
+      ""
+    );
+    if (distDir) {
+      const files = readdirSync(path.join(distDir, "assets"));
+      const cssFile = files.find((file) => file.endsWith(".css"));
+      const jsFile = files.find((file) => file.endsWith(".js"));
+      const prefix = distDir.slice(path.join(import.meta.dirname, options.directory).length);
+      htmlTemplate = htmlTemplate.replace(`<script type="module" src="/src/main.tsx"></script>`, "");
+      if (cssFile && jsFile) {
+        htmlTemplate = htmlTemplate.replace(
+          "{{distAssets}}",
+          `<link rel="stylesheet" href="${path.join(
+            prefix,
+            "assets",
+            cssFile
+          )}" />
+             <script type="module" src="${path.join(
+            prefix,
+            "assets",
+            jsFile
+          )}"></script>`
+        );
+      } else {
+        Logger.error(`Could not find CSS and JS files in dist assets.`);
+        htmlTemplate = htmlTemplate.replace("{{distAssets}}", "");
+      }
+    } else {
+      htmlTemplate = htmlTemplate.replace("{{distAssets}}", "");
+    }
+    return htmlTemplate.replace("{{og}}", ogToHtml(finalConfig.og ?? {})).replace("{{title}}", finalConfig.rootTitle ?? "Serve My MD").replace("{{description}}", finalConfig.description ?? "").replace(
+      "{{favicon}}",
+      finalConfig.favicon ? `<link rel="icon" href="${finalConfig.favicon}" />` : ""
+    ).replace(
       "{{fonts}}",
       finalConfig.fonts ? (finalConfig.fonts.title && finalConfig.fonts.title.url ? `<link rel="stylesheet" href="${finalConfig.fonts.title.url}" />` : "") + (finalConfig.fonts.body && finalConfig.fonts.body.url ? `<link rel="stylesheet" href="${finalConfig.fonts.body.url}" />` : "") + (finalConfig.fonts.mono && finalConfig.fonts.mono.url ? `<link rel="stylesheet" href="${finalConfig.fonts.mono.url}" />` : "") : ""
-    );
+    ).replace("{{content}}", STATIC_TEMP_CONTENT_PREFIX + (routeContent ?? "")).trim();
   } catch (err) {
     throw new Error(`Failed to generate HTML: ${err}`);
+  }
+}
+async function buildDistRoutesFromRouteTree(routeTree, groupedRoutes, distPath, prefix = "/") {
+  for (const node of routeTree) {
+    if (node.children && node.isGrouper) {
+      await buildDistRoutesFromRouteTree(
+        node.children,
+        groupedRoutes,
+        distPath,
+        prefix
+      );
+    } else {
+      const distRoutePath = path.join(distPath, prefix, node.pathSegment.replace("/", "")) + (node.pathSegment === "" ? "/index.html" : ".html");
+      console.log("distRoutePath: ", distRoutePath);
+      console.log("nodeChildren: ", node.children);
+      await fs2.mkdir(path.dirname(distRoutePath), { recursive: true });
+      const html = await generateHtml(
+        distPath,
+        groupedRoutes[prefix + node.pathSegment]?.[0]?.content
+      );
+      await fs2.writeFile(distRoutePath, html, "utf-8");
+      if (node.children) {
+        await buildDistRoutesFromRouteTree(
+          node.children,
+          groupedRoutes,
+          distPath,
+          path.join(prefix, node.pathSegment)
+        );
+      }
+    }
   }
 }
 
@@ -272,6 +361,7 @@ var smm_config_default = {
 // cli/src/shared.ts
 import MarkdownItFootNote from "markdown-it-footnote";
 import MarkdownItTasks from "markdown-it-task-lists";
+import loadLanguages from "prismjs/components/index.js";
 var { shouldIgnore } = await parseSmmIgnore(
   path2.join(options.directory, config_default.defaultIgnorePath)
 );
@@ -282,38 +372,41 @@ var finalConfig = {
 var md = new MarkdownIt({
   ...finalConfig.markdownItOptions,
   highlight: function(str, lang) {
-    if (lang && Prism.languages[lang]) {
-      const highlighted = Prism.highlight(str, Prism.languages[lang], lang);
-      return `<pre class="language-${lang}"><code class="language-${lang}">${highlighted}</code></pre>`;
+    if (!Object.hasOwn(Prism.languages, lang)) {
+      loadLanguages([lang]);
     }
-    return `<pre class="language-plaintext"><code>${md.utils.escapeHtml(str)}</code></pre>`;
+    const highlighted = Prism.highlight(str, Prism.languages[lang], lang);
+    return `<pre class="language-${lang}"><code class="language-${lang}">${highlighted}</code></pre>`;
   }
 }).use(MarkdownItFootNote).use(MarkdownItTasks);
 md.linkify.set({ fuzzyEmail: false });
 var mdParser = md;
 
 // cli/src/core/build.ts
-import { cp, writeFile } from "fs/promises";
+import { cp, rm, writeFile } from "fs/promises";
 import path3, { resolve } from "path";
 import { fileURLToPath } from "url";
 import { build as viteBuild } from "vite";
 import { mkdirSync } from "fs";
+var DIST_DIRNAME = "dist";
+var WEB_DIRNAME = "web";
+var PUBLIC_DIRNAME = "public";
 async function build(options2) {
   const skipBuild = ("skipBuild" in options2 && options2.skipBuild) ?? false;
-  const { nestedPaths, files: markdownFiles } = await getMarkdownFiles(
+  const { routeTree, files: markdownFiles } = await getMarkdownFiles(
     options2.directory
   );
   const parsePromises = [];
   Logger.log("Processing routes...");
-  for (const file of makeRoutesOfNestedPathsRaw(nestedPaths)) {
+  for (const file of makeRoutesOfNestedPathsRaw(routeTree)) {
     parsePromises.push(parseMD(path3.join(options2.directory, file)));
   }
-  cleanNestedPaths(nestedPaths);
+  cleanNestedPaths(routeTree);
   const groupedRoutes = Object.groupBy(
     await Promise.all(parsePromises),
     (route) => route.path
   );
-  const routes = makeRoutesOfNestedPaths(nestedPaths).reduce(
+  const routes = makeRoutesOfNestedPaths(routeTree).reduce(
     (acc, path4) => [...acc, ...groupedRoutes[path4] ?? []],
     []
   );
@@ -337,8 +430,8 @@ async function build(options2) {
     Logger.log(o.path);
   });
   const __dirname = path3.dirname(fileURLToPath(import.meta.url));
-  const webDir = path3.join(__dirname, "..", "web");
-  const distDir = path3.join(webDir, "dist");
+  const webDir = path3.join(__dirname, "..", WEB_DIRNAME);
+  const distDir = path3.join(webDir, DIST_DIRNAME);
   mkdirSync(path3.join(webDir, "src", ".generated"), { recursive: true });
   await writeFile(
     path3.join(webDir, "src", ".generated", "output.json"),
@@ -346,32 +439,36 @@ async function build(options2) {
   );
   await writeFile(
     path3.join(webDir, "src", ".generated", "paths.json"),
-    JSON.stringify(nestedPaths)
+    JSON.stringify(routeTree)
   );
   Logger.log("\nParsed MDs");
   await writeFile(path3.join(webDir, "index.html"), await generateHtml());
   Logger.log("Generated HTML from template");
-  if (finalConfig.publicPath) {
-    if (await FileOrDirectoryExists(
-      path3.join(options2.directory, finalConfig.publicPath)
-    )) {
-      Logger.log(`Copying public assets from ${finalConfig.publicPath}...`);
-      await cp(
-        path3.join(options2.directory, finalConfig.publicPath),
-        path3.join(webDir, "public"),
-        { recursive: true }
-      );
-    } else {
-      Logger.error(`Public path "${finalConfig.publicPath}" does not exist!`);
-    }
-  }
   if (!skipBuild) {
+    if (finalConfig.publicPath) {
+      if (await FileOrDirectoryExists(
+        path3.join(options2.directory, finalConfig.publicPath)
+      )) {
+        Logger.log(`Copying public assets from ${finalConfig.publicPath}...`);
+        await cp(
+          path3.join(options2.directory, finalConfig.publicPath),
+          path3.join(webDir, PUBLIC_DIRNAME),
+          { recursive: true }
+        );
+      } else {
+        Logger.error(`Public path "${finalConfig.publicPath}" does not exist!`);
+      }
+    }
     Logger.log("Building the app...");
     await viteBuild({
       configFile: resolve(webDir, "vite.config.ts")
     });
+    await buildDistRoutesFromRouteTree(routeTree, groupedRoutes, distDir);
+    const targetDist = path3.join(options2.directory, DIST_DIRNAME);
+    await rm(targetDist, { recursive: true }).catch(() => {
+    });
     Logger.log("Built the app, copying results...");
-    return cp(distDir, options2.directory).then(() => {
+    return cp(distDir, targetDist, { recursive: true }).then(() => {
       Logger.log("Done successfully!");
       return true;
     }).catch((err) => {

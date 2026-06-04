@@ -1,14 +1,14 @@
 import logger from "@/lib/logger.js";
 import { finalConfig } from "@/shared.js";
 import type { Args } from "@/types/index.js";
-import type { Route, Out, NestedPair } from "@shared/index.js";
+import type { Route, Out, RouteTree } from "@shared/index.js";
 import {
   FileOrDirectoryExists,
   makeRoutesOfNestedPaths,
   makeRoutesOfNestedPathsRaw,
   optional,
 } from "@/utils/index.js";
-import { cp, writeFile } from "fs/promises";
+import { cp, rm, writeFile } from "fs/promises";
 import path, { resolve } from "path";
 import { fileURLToPath } from "url";
 import { build as viteBuild } from "vite";
@@ -17,31 +17,35 @@ import {
   cleanNestedPaths,
   parseMD,
   generateHtml,
+  buildDistRoutesFromRouteTree,
 } from "./index.js";
 import { mkdirSync } from "fs";
 
-export default async function build(options: Args): Promise<boolean> {
-  const skipBuild = ('skipBuild' in options && options.skipBuild) ?? false;
+const DIST_DIRNAME = "dist";
+const WEB_DIRNAME = "web";
+const PUBLIC_DIRNAME = "public";
 
-  const { nestedPaths, files: markdownFiles } = (await getMarkdownFiles(
+export default async function build(options: Args): Promise<boolean> {
+  const skipBuild = ("skipBuild" in options && options.skipBuild) ?? false;
+
+  const { routeTree, files: markdownFiles } = (await getMarkdownFiles(
     options.directory,
-  )) as { nestedPaths: NestedPair<string>[]; files: string[] };
+  )) as { routeTree: RouteTree[]; files: string[] };
 
   const parsePromises: Promise<Route>[] = [];
   logger.log("Processing routes...");
-  for (const file of makeRoutesOfNestedPathsRaw(nestedPaths)) {
+  for (const file of makeRoutesOfNestedPathsRaw(routeTree)) {
     parsePromises.push(parseMD(path.join(options.directory, file)));
   }
 
-  cleanNestedPaths(nestedPaths);
-
+  cleanNestedPaths(routeTree);
 
   const groupedRoutes = Object.groupBy(
     await Promise.all(parsePromises),
     (route) => route.path,
   );
 
-  const routes = makeRoutesOfNestedPaths(nestedPaths).reduce(
+  const routes = makeRoutesOfNestedPaths(routeTree).reduce(
     (acc, path) => [...acc, ...(groupedRoutes[path] ?? [])],
     [] as Route[],
   );
@@ -69,8 +73,8 @@ export default async function build(options: Args): Promise<boolean> {
 
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-  const webDir = path.join(__dirname, "..", "web");
-  const distDir = path.join(webDir, "dist");
+  const webDir = path.join(__dirname, "..", WEB_DIRNAME);
+  const distDir = path.join(webDir, DIST_DIRNAME);
 
   mkdirSync(path.join(webDir, "src", ".generated"), { recursive: true });
 
@@ -80,37 +84,43 @@ export default async function build(options: Args): Promise<boolean> {
   );
   await writeFile(
     path.join(webDir, "src", ".generated", "paths.json"),
-    JSON.stringify(nestedPaths),
+    JSON.stringify(routeTree),
   );
   logger.log("\nParsed MDs");
   await writeFile(path.join(webDir, "index.html"), await generateHtml());
   logger.log("Generated HTML from template");
 
-  if (finalConfig.publicPath) {
-    if (
-      await FileOrDirectoryExists(
-        path.join(options.directory, finalConfig.publicPath),
-      )
-    ) {
-      logger.log(`Copying public assets from ${finalConfig.publicPath}...`);
-      await cp(
-        path.join(options.directory, finalConfig.publicPath),
-        path.join(webDir, "public"),
-        { recursive: true },
-      );
-    } else {
-      logger.error(`Public path "${finalConfig.publicPath}" does not exist!`);
-    }
-  }
-
   if (!skipBuild) {
+    if (finalConfig.publicPath) {
+      if (
+        await FileOrDirectoryExists(
+          path.join(options.directory, finalConfig.publicPath),
+        )
+      ) {
+        logger.log(`Copying public assets from ${finalConfig.publicPath}...`);
+        await cp(
+          path.join(options.directory, finalConfig.publicPath),
+          path.join(webDir, PUBLIC_DIRNAME),
+          { recursive: true },
+        );
+      } else {
+        logger.error(`Public path "${finalConfig.publicPath}" does not exist!`);
+      }
+    }
+
     logger.log("Building the app...");
     await viteBuild({
       configFile: resolve(webDir, "vite.config.ts"),
     });
 
+    await buildDistRoutesFromRouteTree(routeTree, groupedRoutes, distDir);
+
+    const targetDist = path.join(options.directory, DIST_DIRNAME);
+
+    await rm(targetDist, { recursive: true }).catch(() => {});
+
     logger.log("Built the app, copying results...");
-    return cp(distDir, options.directory)
+    return cp(distDir, targetDist, { recursive: true })
       .then(() => {
         logger.log("Done successfully!");
         return true;

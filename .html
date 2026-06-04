@@ -3,20 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="" />
+    
     <meta name="theme-color" content="#000000" />
     <meta
     name="description"
-      content="A fixture for testing costly operations in SMM."
+      content="Docs for serve-my-md."
       />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" />
-    <meta property="og:title" content="SMM Costly Fixture">
-<meta property="og:description" content="A fixture for testing costly operations in SMM.">
-<meta property="og:site_name" content="SMM Costly Store">
-<meta property="og:determiner" content="the">
-<meta property="og:image" content="/og-image.png">
-    <title>SMM Costly Fixture</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,100..900;1,100..900&display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@100..900&display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" />
     
+    <title>Serve My MD Docs</title>
+    {{distAssets}}
     
     <style>
       @keyframes keep-rotating {
@@ -61,7 +57,21 @@
     </style>
   </head>
   <body class='loading'>
-    <div id="app">__smm_static_temp_content__</div>
+    <div id="app">__smm_static_temp_content__<h1>Build Output and Assets</h1>
+<p>Build flow highlights:</p>
+<ul>
+<li>markdown files are parsed into route/content JSON</li>
+<li>generated data is written under web generated assets</li>
+<li>static app is built and copied to target docs directory</li>
+</ul>
+<p>Generated files consumed by the web app:</p>
+<ul>
+<li><code>.generated/output.json</code>: metadata and parsed route content</li>
+<li><code>.generated/paths.json</code>: nested tree used to render sidebar groups/collapsibles</li>
+</ul>
+<p>If <code>publicPath</code> is configured and exists, that directory is copied as public assets before build.</p>
+<p>If no <code>smm.config.json</code> or <code>.smmignore</code> exists, defaults are used automatically.</p>
+</div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

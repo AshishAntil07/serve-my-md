@@ -1,6 +1,3 @@
-<!-- ? this html file is a template for that final site -->
-
-
 <!doctype html>
 <html lang="en">
   <head>
@@ -9,9 +6,9 @@
     <link rel="icon" href="" />
     <meta name="theme-color" content="#000000" />
     <meta
-      name="description"
+    name="description"
       content="A fixture for testing ghostly operations in SMM."
-    />
+      />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sorts+Mill+Goudy:ital@0;1&display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" />
     <meta property="og:title" content="SMM Ghostly Fixture">
 <meta property="og:description" content="A fixture for testing ghostly operations in SMM.">
@@ -19,9 +16,52 @@
 <meta property="og:determiner" content="the">
 <meta property="og:image" content="/og-image.png">
     <title>SMM Ghostly Fixture</title>
+    
+    
+    <style>
+      @keyframes keep-rotating {
+        from {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+
+      body.loading {
+        overflow: hidden;
+
+        &::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          z-index: 50;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(4px);
+        }
+
+        &::after {
+          content: '';
+          position: fixed;
+          width: 4rem;
+          height: 4rem;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 51;
+          border: 4px solid #3498db;
+          border-top-color: transparent;
+          border-radius: 50%;
+          animation: keep-rotating 1s linear infinite;
+        }
+      }
+    </style>
   </head>
-  <body>
-    <div id="app"></div>
+  <body class='loading'>
+    <div id="app">__smm_static_temp_content__</div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
