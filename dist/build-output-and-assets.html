@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <meta name="theme-color" content="#000000" />
+    <meta
+    name="description"
+      content="Docs for serve-my-md."
+      />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,100..900;1,100..900&display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@100..900&display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" />
+    
+    <title>Serve My MD Docs</title>
+    <link rel="stylesheet" href="assets/index-CtAvLsGZ.css" />
+             <script type="module" src="assets/index-CGpIQmwc.js"></script>
+    
+    <style>
+      @keyframes keep-rotating {
+        from {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+
+      body.loading {
+        overflow: hidden;
+
+        &::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          z-index: 50;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(4px);
+        }
+
+        &::after {
+          content: '';
+          position: fixed;
+          width: 4rem;
+          height: 4rem;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 51;
+          border: 4px solid #3498db;
+          border-top-color: transparent;
+          border-radius: 50%;
+          animation: keep-rotating 1s linear infinite;
+        }
+      }
+    </style>
+  </head>
+  <body class='loading'>
+    <div id="app">__smm_static_temp_content__<h1>Build Output and Assets</h1>
+<h2>Static site generation (SSG)</h2>
+<p>The CLI generates a fully static site. Every route gets its own <code>.html</code> file with pre-rendered markdown content baked into the DOM. The site works without JavaScript — search engines see all content, and the page is immediately readable.</p>
+<p>Once the JS bundle loads, the React SPA hydrates and takes over navigation for seamless client-side transitions.</p>
+<h2>Build flow</h2>
+<ol>
+<li>Markdown files are scanned and parsed into route/content JSON.</li>
+<li>Generated route data is written under <code>web/src/.generated/</code>.</li>
+<li>Vite builds the web app (CSS + JS bundles).</li>
+<li>Static HTML pages are generated for each route via <code>buildDistRoutesFromRouteTree</code>.</li>
+<li>The built <code>dist/</code> directory is copied to the target docs directory.</li>
+</ol>
+<h2>Generated files</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>.generated/output.json</code></td>
+<td>Route metadata and parsed markdown content for all pages</td>
+</tr>
+<tr>
+<td><code>.generated/paths.json</code></td>
+<td>Nested route tree used to render sidebar groups and collapsibles</td>
+</tr>
+</tbody>
+</table>
+<h2>Public assets</h2>
+<p>If <code>publicPath</code> is configured in <code>smm.config.json</code> and the directory exists, its contents are copied into the web app's <code>public/</code> directory before the Vite build. This is useful for images, fonts, or other static files.</p>
+<h2>Output structure</h2>
+<pre class="language-text"><code class="language-text">dist/
+  index.html              ← home page (pre-rendered)
+  getting-started.html    ← each route gets its own .html
+  cli-reference.html
+  smm-config/
+    index.html
+    defaults-and-options.html
+    trim-and-ordering.html
+  assets/
+    index-abc123.css       ← Vite-built CSS
+    index-abc123.js        ← Vite-built JS (hydration)
+</code></pre>
+<h2>Defaults</h2>
+<p>If no <code>smm.config.json</code> or <code>.smmignore</code> exists, built-in defaults are used automatically.</p>
+</div>
+    
+  </body>
+</html>

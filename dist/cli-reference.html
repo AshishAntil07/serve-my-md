@@ -58,29 +58,51 @@
     </style>
   </head>
   <body class='loading'>
-    <div id="app">__smm_static_temp_content__<h1>serve-my-md Docs</h1>
-<p>Welcome to the docs for <code>serve-my-md</code>.</p>
-<p>A tiny CLI to generate a static docs website from markdown files.</p>
+    <div id="app">__smm_static_temp_content__<h1>CLI Reference</h1>
+<h2>Main command</h2>
 <ul>
-<li><a href="/why-serve-my-md">Why serve-my-md?</a></li>
-<li><a href="/getting-started">Getting Started</a></li>
-<li><a href="/cli-reference">CLI Reference</a></li>
+<li><code>serve-my-md</code>: build a static docs website from markdown files.</li>
 </ul>
-<h3>Guide</h3>
+<h2>Options</h2>
 <ul>
-<li><a href="/routing-and-sidebar-patterns">Routing and Sidebar Patterns</a></li>
-<li><a href="/markdown-and-rendering">Markdown and Rendering</a></li>
-<li><a href="/build-output-and-assets">Build Output and Assets</a></li>
+<li><code>-d, --directory &lt;path&gt;</code>: docs root path (default <code>.</code>).</li>
+<li><code>-i, --interactive</code>: prompt for docs root.</li>
 </ul>
-<h3>Configuration</h3>
+<h2>Build output (SSG)</h2>
+<p>The CLI generates a fully static site:</p>
 <ul>
-<li><a href="/smm-config">SMM Config</a></li>
-<li><a href="/smm-ignore">SMM Ignore</a></li>
+<li>Each route gets its own <code>.html</code> file with pre-rendered markdown content in the HTML</li>
+<li>Assets (CSS, JS) are built via Vite and placed under <code>dist/assets/</code></li>
+<li>The final <code>dist/</code> directory is copied to your docs root — ready to deploy</li>
 </ul>
-<h3>Examples</h3>
+<h2>Config and ignore loading</h2>
 <ul>
-<li><a href="/structure-examples">Structure Examples</a></li>
-<li><a href="/config-examples">Config Examples</a></li>
+<li>Loads config from <code>./smm.config.json</code> relative to target directory.</li>
+<li>Loads ignore rules from <code>./.smmignore</code> relative to target directory.</li>
+<li>If <code>publicPath</code> is set in config, copies that directory into app public assets before build.</li>
+</ul>
+<h2>Markdown pipeline</h2>
+<ul>
+<li>Uses markdown-it with task lists and footnotes plugins enabled.</li>
+<li>Prism.js syntax highlighting with auto-loading for unknown languages.</li>
+<li>Generates OG/meta/font tags in HTML from config values.</li>
+</ul>
+<h2>Runtime/navigation behaviors</h2>
+<ul>
+<li>Markdown links with non-HTTP hrefs are intercepted and navigated client-side.</li>
+<li>Intent-based link preloading for faster navigation.</li>
+<li>Keyboard shortcuts:
+<ul>
+<li>Search: <code>Ctrl+Shift+F</code></li>
+<li>Next page: <code>Alt+Enter</code></li>
+<li>Previous page: <code>Alt+Shift+Enter</code></li>
+</ul>
+</li>
+<li>Search returns matches in current page and across other pages.</li>
+</ul>
+<h2>Test-only option</h2>
+<ul>
+<li><code>--skip-build</code> exists only in vitest mode, not in normal CLI usage.</li>
 </ul>
 <h2>Future goals</h2>
 <ul>

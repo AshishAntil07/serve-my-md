@@ -58,40 +58,23 @@
     </style>
   </head>
   <body class='loading'>
-    <div id="app">__smm_static_temp_content__<h1>serve-my-md Docs</h1>
-<p>Welcome to the docs for <code>serve-my-md</code>.</p>
-<p>A tiny CLI to generate a static docs website from markdown files.</p>
+    <div id="app">__smm_static_temp_content__<h1>Markdown and Rendering</h1>
+<p>The CLI uses <code>markdown-it</code> and includes:</p>
 <ul>
-<li><a href="/why-serve-my-md">Why serve-my-md?</a></li>
-<li><a href="/getting-started">Getting Started</a></li>
-<li><a href="/cli-reference">CLI Reference</a></li>
+<li>footnotes support</li>
+<li>task lists support</li>
 </ul>
-<h3>Guide</h3>
+<p>Code highlighting is enabled through Prism with language classes like <code>language-js</code>.</p>
+<p>Useful notes:</p>
 <ul>
-<li><a href="/routing-and-sidebar-patterns">Routing and Sidebar Patterns</a></li>
-<li><a href="/markdown-and-rendering">Markdown and Rendering</a></li>
-<li><a href="/build-output-and-assets">Build Output and Assets</a></li>
+<li><code>linkify</code> is enabled by default in config options.</li>
+<li><code>fuzzyEmail</code> linkification is disabled.</li>
+<li>You can override markdown-it behavior via <code>markdownItOptions</code> in <code>smm.config.json</code>.</li>
 </ul>
-<h3>Configuration</h3>
+<p>Additional rendering behavior from the web app:</p>
 <ul>
-<li><a href="/smm-config">SMM Config</a></li>
-<li><a href="/smm-ignore">SMM Ignore</a></li>
-</ul>
-<h3>Examples</h3>
-<ul>
-<li><a href="/structure-examples">Structure Examples</a></li>
-<li><a href="/config-examples">Config Examples</a></li>
-</ul>
-<h2>Future goals</h2>
-<ul>
-<li><strong>Search Indexing</strong> — structured search index for smarter results</li>
-<li><strong>Config validation</strong> — Zod-based schema validation of <code>smm.config.json</code> with JSON Schema export</li>
-<li><strong>Sitemap</strong> — automatic <code>sitemap.xml</code> generation</li>
-<li><strong>Per-page Open Graph</strong> — page-level og tags from frontmatter</li>
-<li><strong>Doctor command</strong> — health checks: config validation, route discovery, broken link detection, and more</li>
-<li><strong>Link validation</strong> — flag invalid internal links at build-time</li>
-<li><strong>Optional RSS</strong> — config-enableable RSS feed for blog/changelog content</li>
-<li><strong>SchemaStore upload</strong> — publish JSON Schema to SchemaStore once stable</li>
+<li>Heading elements are assigned generated ids for anchor navigation.</li>
+<li>Other extracted elements can receive internal labels for in-page search scroll targets.</li>
 </ul>
 </div>
     

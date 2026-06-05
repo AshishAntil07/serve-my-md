@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <meta name="theme-color" content="#000000" />
+    <meta
+    name="description"
+      content="Docs for serve-my-md."
+      />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,100..900;1,100..900&display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@100..900&display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" />
+    
+    <title>Serve My MD Docs</title>
+    <link rel="stylesheet" href="assets/index-CtAvLsGZ.css" />
+             <script type="module" src="assets/index-CGpIQmwc.js"></script>
+    
+    <style>
+      @keyframes keep-rotating {
+        from {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+
+      body.loading {
+        overflow: hidden;
+
+        &::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          z-index: 50;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(4px);
+        }
+
+        &::after {
+          content: '';
+          position: fixed;
+          width: 4rem;
+          height: 4rem;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 51;
+          border: 4px solid #3498db;
+          border-top-color: transparent;
+          border-radius: 50%;
+          animation: keep-rotating 1s linear infinite;
+        }
+      }
+    </style>
+  </head>
+  <body class='loading'>
+    <div id="app">__smm_static_temp_content__<h1>Routing and Sidebar Patterns</h1>
+<h2><code>index.md</code> is landing page</h2>
+<ul>
+<li><code>index.md</code> represents the landing page for its directory.</li>
+<li><code>index</code> is not part of URL pathnames.</li>
+<li>In nested name handling, <code>index.md</code> maps to <code>&quot;&quot;</code> (empty string).</li>
+<li>If a directory contains only an <code>index.md</code> and no other files, the directory collapses to a leaf node (no collapsible in sidebar).</li>
+</ul>
+<h2>Grouping directories with parentheses (groupers)</h2>
+<p>Directory names wrapped in <code>()</code> act as <strong>groupers</strong>:</p>
+<ul>
+<li>shown as a labeled section in the sidebar (not collapsible)</li>
+<li>skipped from route pathname segments</li>
+<li>should not contain <code>index.md</code></li>
+<li>can be ordered with numeric prefixes: <code>(2. Category)</code></li>
+</ul>
+<p>Groupers are useful for visually grouping related pages without adding extra URL segments.</p>
+<p>Example:</p>
+<pre class="language-text"><code class="language-text">docs/
+  (Guides)/
+    setup.md
+    usage.md
+</code></pre>
+<p>Routes:</p>
+<ul>
+<li><code>/setup</code></li>
+<li><code>/usage</code></li>
+</ul>
+<p>Sidebar:</p>
+<pre class="language-text"><code class="language-text">Guides          ← grouper label (not a link)
+  Setup
+  Usage
+</code></pre>
+<h2>Grouper ordering and index collision rules</h2>
+<p>Numeric prefixes on groupers only control ordering among other groupers — they never collide with indexes on regular files or directories. This is because the sort algorithm always places groupers after every regular file and directory at the same level, regardless of what prefix you give them.</p>
+<p>Similarly, numeric prefixes on regular files and directories only control ordering among their own kind.</p>
+<p>In short:</p>
+<ul>
+<li><code>index.md</code> is always sorted first.</li>
+<li>Regular files and directories are sorted next (by label).</li>
+<li>Groupers are sorted last (by label), after all regular files and directories.</li>
+<li>Within each group (regulars and groupers), ordering is controlled by numeric prefixes and <code>localeCompare</code>.</li>
+</ul>
+<p>Example:</p>
+<pre class="language-text"><code class="language-text">docs/
+  index.md
+  1. Getting Started.md
+  2. CLI Reference.md
+  (1. Guide)/
+    routing.md
+  (2. Configuration)/
+    smm-config.md
+  (3. Examples)/
+    structure.md
+</code></pre>
+<p>Sidebar order:</p>
+<pre class="language-text"><code class="language-text">Home              ← index.md first
+Getting Started
+CLI Reference
+Guide             ← grouper label (after all regular files)
+  Routing
+Configuration     ← next grouper
+  SMM Config
+Examples          ← last grouper
+  Structure
+</code></pre>
+<h2>Regular directories (without parentheses)</h2>
+<ul>
+<li>appear as collapsible sidebar containers</li>
+<li>can have <code>index.md</code> and be clickable landing pages</li>
+<li>are included in pathname segments of child files</li>
+</ul>
+<p>Example:</p>
+<pre class="language-text"><code class="language-text">docs/
+  guides/
+    index.md
+    setup.md
+</code></pre>
+<p>Routes:</p>
+<ul>
+<li><code>/guides</code></li>
+<li><code>/guides/setup</code></li>
+</ul>
+<h2>Ordered filenames with index prefixes</h2>
+<p>If you use names like:</p>
+<ul>
+<li><code>1. blahblah.md</code></li>
+<li><code>2. blhalbhablah.md</code></li>
+</ul>
+<p>and set <code>trimIndexFromPath: true</code> in config, names can be ordered while emitted as clean paths.</p>
+<p>The index prefix in filenames does not conflict with grouper indexes — they operate in separate sort tiers.</p>
+<h2>Directories vs groupers summary</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Sidebar rendering</th>
+<th>In URL path</th>
+<th>Can have <code>index.md</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Regular directory</td>
+<td>Collapsible</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Grouper <code>(Name)</code></td>
+<td>Labeled section</td>
+<td>No</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h2>Slug generation rules</h2>
+<p>Route path segments are normalized by the CLI:</p>
+<ul>
+<li>converted to lowercase</li>
+<li>spaces/underscores become <code>-</code></li>
+<li>punctuation like <code>.,;&quot;'\\:&lt;&gt;</code>?!` is removed</li>
+<li>grouper directory names like <code>(Group)</code> are excluded from final pathname</li>
+</ul>
+</div>
+    
+  </body>
+</html>

@@ -58,40 +58,33 @@
     </style>
   </head>
   <body class='loading'>
-    <div id="app">__smm_static_temp_content__<h1>serve-my-md Docs</h1>
-<p>Welcome to the docs for <code>serve-my-md</code>.</p>
-<p>A tiny CLI to generate a static docs website from markdown files.</p>
+    <div id="app">__smm_static_temp_content__<h1>Structure Examples</h1>
+<h2>Group directory (not in pathname)</h2>
+<pre class="language-text"><code class="language-text">docs/
+  (Category)/
+    tos.md
+</code></pre>
+<p>Route: <code>/tos</code></p>
+<h2>Normal directory with landing page</h2>
+<pre class="language-text"><code class="language-text">docs/
+  features/
+    index.md
+    tea.md
+</code></pre>
+<p>Routes:</p>
 <ul>
-<li><a href="/why-serve-my-md">Why serve-my-md?</a></li>
-<li><a href="/getting-started">Getting Started</a></li>
-<li><a href="/cli-reference">CLI Reference</a></li>
+<li><code>/features</code></li>
+<li><code>/features/tea</code></li>
 </ul>
-<h3>Guide</h3>
+<h2>Root landing page</h2>
+<pre class="language-text"><code class="language-text">docs/
+  index.md
+  about.md
+</code></pre>
+<p>Routes:</p>
 <ul>
-<li><a href="/routing-and-sidebar-patterns">Routing and Sidebar Patterns</a></li>
-<li><a href="/markdown-and-rendering">Markdown and Rendering</a></li>
-<li><a href="/build-output-and-assets">Build Output and Assets</a></li>
-</ul>
-<h3>Configuration</h3>
-<ul>
-<li><a href="/smm-config">SMM Config</a></li>
-<li><a href="/smm-ignore">SMM Ignore</a></li>
-</ul>
-<h3>Examples</h3>
-<ul>
-<li><a href="/structure-examples">Structure Examples</a></li>
-<li><a href="/config-examples">Config Examples</a></li>
-</ul>
-<h2>Future goals</h2>
-<ul>
-<li><strong>Search Indexing</strong> — structured search index for smarter results</li>
-<li><strong>Config validation</strong> — Zod-based schema validation of <code>smm.config.json</code> with JSON Schema export</li>
-<li><strong>Sitemap</strong> — automatic <code>sitemap.xml</code> generation</li>
-<li><strong>Per-page Open Graph</strong> — page-level og tags from frontmatter</li>
-<li><strong>Doctor command</strong> — health checks: config validation, route discovery, broken link detection, and more</li>
-<li><strong>Link validation</strong> — flag invalid internal links at build-time</li>
-<li><strong>Optional RSS</strong> — config-enableable RSS feed for blog/changelog content</li>
-<li><strong>SchemaStore upload</strong> — publish JSON Schema to SchemaStore once stable</li>
+<li><code>/</code></li>
+<li><code>/about</code></li>
 </ul>
 </div>
     

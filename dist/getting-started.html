@@ -58,29 +58,38 @@
     </style>
   </head>
   <body class='loading'>
-    <div id="app">__smm_static_temp_content__<h1>serve-my-md Docs</h1>
-<p>Welcome to the docs for <code>serve-my-md</code>.</p>
-<p>A tiny CLI to generate a static docs website from markdown files.</p>
+    <div id="app">__smm_static_temp_content__<h1>Getting Started</h1>
+<h2>Install</h2>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> i <span class="token parameter variable">-g</span> serve-my-md
+</code></pre>
+<h2>Run</h2>
+<pre class="language-bash"><code class="language-bash">serve-my-md <span class="token parameter variable">--directory</span> <span class="token builtin class-name">.</span>
+</code></pre>
+<p>The CLI scans markdown files in the target directory and generates a static website there. Every page is a standalone HTML file (SSG) — deploy to any static host or CDN.</p>
+<h2>What gets read automatically</h2>
 <ul>
-<li><a href="/why-serve-my-md">Why serve-my-md?</a></li>
-<li><a href="/getting-started">Getting Started</a></li>
-<li><a href="/cli-reference">CLI Reference</a></li>
+<li><code>smm.config.json</code> at docs root (if present)</li>
+<li><code>.smmignore</code> at docs root (if present)</li>
+<li>fallback to built-in defaults when these files are missing</li>
 </ul>
-<h3>Guide</h3>
+<h2>Important <code>index.md</code> behavior</h2>
 <ul>
-<li><a href="/routing-and-sidebar-patterns">Routing and Sidebar Patterns</a></li>
-<li><a href="/markdown-and-rendering">Markdown and Rendering</a></li>
-<li><a href="/build-output-and-assets">Build Output and Assets</a></li>
+<li><code>index.md</code> is the landing page for its directory.</li>
+<li><code>index</code> is never included in the pathname.</li>
+<li>Internally, an <code>index.md</code> entry is treated as <code>&quot;&quot;</code> (empty string) in route tree naming.</li>
 </ul>
-<h3>Configuration</h3>
+<p>Example:</p>
+<pre class="language-text"><code class="language-text">docs/
+  index.md
+  guides/
+    index.md
+    install.md
+</code></pre>
+<p>Routes:</p>
 <ul>
-<li><a href="/smm-config">SMM Config</a></li>
-<li><a href="/smm-ignore">SMM Ignore</a></li>
-</ul>
-<h3>Examples</h3>
-<ul>
-<li><a href="/structure-examples">Structure Examples</a></li>
-<li><a href="/config-examples">Config Examples</a></li>
+<li><code>/</code></li>
+<li><code>/guides</code></li>
+<li><code>/guides/install</code></li>
 </ul>
 <h2>Future goals</h2>
 <ul>
