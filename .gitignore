@@ -1,2 +1,4 @@
 /md/dist
 node_modules
+./web/src/.generated
+bin

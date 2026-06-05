@@ -34,14 +34,14 @@ export default function Sidebar() {
         if (prefix !== '/' && !label) return null;
 
         return children ? isGrouper ? (
-            <div key={i} title={label} className="pl-2 mt-2">
+            <div key={i} title={label} className="pl-2 mt-2 mb-0.5">
               <span className="text-sm text-muted-foreground pr-2">{label}</span>
               <div className="flex flex-col gap-0 pl-1">
                 {buildLinks(children, prefix)}
               </div>
             </div>
           ) : (
-          <Collapsible key={i}>
+          <Collapsible key={i} className="my-0.5">
             <CollapsibleTrigger className="flex justify-between w-full font-body">
               <IntentLink to={prefix + '/' + pathSegment} className="px-2 py-0.5">
                 {label || 'Home'}
@@ -57,7 +57,7 @@ export default function Sidebar() {
           <IntentLink
             key={i}
             to={prefix + '/' + pathSegment}
-            className="block px-2 py-0.5 font-body"
+            className="block px-2 py-0.5 my-0.5 font-body"
           >
             {label || 'Home'}
           </IntentLink>

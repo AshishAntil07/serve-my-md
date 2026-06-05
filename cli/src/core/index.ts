@@ -279,8 +279,6 @@ export async function buildDistRoutesFromRouteTree(
         path.join(distPath, prefix, node.pathSegment.replace("/", "")) +
         (node.pathSegment === "" ? "/index.html" : ".html");
 
-      console.log("distRoutePath: ", distRoutePath);
-      console.log("nodeChildren: ", node.children);
       await fs.mkdir(path.dirname(distRoutePath), { recursive: true });
       const html = await generateHtml(
         distPath,
