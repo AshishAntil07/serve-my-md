@@ -14,6 +14,7 @@ export interface SmmConfig {
   description?: string;
   markdownItOptions?: Record<string, any>;
   baseRoute?: string;
+  outDir?: string;
   publicPath?: string;
   defaultTheme?: string;
   favicon?: string;
@@ -45,3 +46,4 @@ Read next:
 
 - [Defaults and Options](/smm-config/defaults-and-options)
 - [Trim and Ordering](/smm-config/trim-and-ordering)
+- [OpenGraph](/smm-config/opengraph)

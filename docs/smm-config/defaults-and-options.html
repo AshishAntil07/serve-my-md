@@ -10,10 +10,13 @@
       content="Docs for serve-my-md."
       />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,100..900;1,100..900&display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@100..900&display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" />
-    
+    <meta property="og:title" content="Serve My MD Docs">
+<meta property="og:description" content="Documentation for serve-my-md, a CLI tool to generate static docs sites from markdown.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Serve My MD Docs">
     <title>Serve My MD Docs</title>
-    <link rel="stylesheet" href="assets/index-CtAvLsGZ.css" />
-             <script type="module" src="assets/index-CGpIQmwc.js"></script>
+    <link rel="stylesheet" href="assets/index-qUN9r2e4.css" />
+             <script type="module" src="assets/index-CGuRb4gH.js"></script>
     
     <style>
       @keyframes keep-rotating {
@@ -58,7 +61,62 @@
     </style>
   </head>
   <body class='loading'>
-    <div id="app">__smm_static_temp_content__</div>
+    <div id="app">__smm_static_temp_content__<h1>Defaults and Options</h1>
+<p><code>smm.config.json</code> supports these useful options:</p>
+<ul>
+<li><code>rootTitle</code>: document title.</li>
+<li><code>description</code>: default description.</li>
+<li><code>markdownItOptions</code>: markdown-it constructor options.</li>
+<li><code>baseRoute</code>: route base prefix.</li>
+<li><code>outDir</code>: output directory name for built artefacts (default <code>&quot;dist&quot;</code>).</li>
+<li><code>publicPath</code>: directory to copy as public assets.</li>
+<li><code>defaultTheme</code>: initial theme.</li>
+<li><code>favicon</code>: favicon URL/path.</li>
+<li><code>logo</code>: logo URL/path.</li>
+<li><code>name</code>: brand/app name.</li>
+<li><code>showNameWithLogo</code>: show name near logo.</li>
+<li><code>og</code>: Open Graph tags object.</li>
+<li><code>sortRoutes</code>: sort routes tree.</li>
+<li><code>trimIndexFromPath</code>: trims filename numeric prefixes from route names.</li>
+<li><code>version</code>: docs/site version string.</li>
+<li><code>fonts</code>: title/body/mono font names and optional stylesheet URLs.</li>
+</ul>
+<h2>Default values used when user config is missing</h2>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"rootTitle"</span><span class="token operator">:</span> <span class="token string">"Serve My MD"</span><span class="token punctuation">,</span>
+  <span class="token property">"description"</span><span class="token operator">:</span> <span class="token string">"A simple markdown to static site builder."</span><span class="token punctuation">,</span>
+  <span class="token property">"baseRoute"</span><span class="token operator">:</span> <span class="token string">"/"</span><span class="token punctuation">,</span>
+  <span class="token property">"defaultTheme"</span><span class="token operator">:</span> <span class="token string">"dark"</span><span class="token punctuation">,</span>
+  <span class="token property">"markdownItOptions"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"html"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token property">"xhtmlOut"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token property">"breaks"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token property">"langPrefix"</span><span class="token operator">:</span> <span class="token string">"language-"</span><span class="token punctuation">,</span>
+    <span class="token property">"linkify"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+    <span class="token property">"typographer"</span><span class="token operator">:</span> <span class="token boolean">false</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"outDir"</span><span class="token operator">:</span> <span class="token string">"dist"</span><span class="token punctuation">,</span>
+  <span class="token property">"favicon"</span><span class="token operator">:</span> <span class="token string">""</span><span class="token punctuation">,</span>
+  <span class="token property">"logo"</span><span class="token operator">:</span> <span class="token string">""</span><span class="token punctuation">,</span>
+  <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"Serve My MD"</span><span class="token punctuation">,</span>
+  <span class="token property">"showNameWithLogo"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"sortRoutes"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"trimIndexFromPath"</span><span class="token operator">:</span> <span class="token boolean">false</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Example:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"rootTitle"</span><span class="token operator">:</span> <span class="token string">"My Docs"</span><span class="token punctuation">,</span>
+  <span class="token property">"description"</span><span class="token operator">:</span> <span class="token string">"Team documentation"</span><span class="token punctuation">,</span>
+  <span class="token property">"baseRoute"</span><span class="token operator">:</span> <span class="token string">"/"</span><span class="token punctuation">,</span>
+  <span class="token property">"defaultTheme"</span><span class="token operator">:</span> <span class="token string">"dark"</span><span class="token punctuation">,</span>
+  <span class="token property">"sortRoutes"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"trimIndexFromPath"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token property">"publicPath"</span><span class="token operator">:</span> <span class="token string">"public"</span><span class="token punctuation">,</span>
+  <span class="token property">"outDir"</span><span class="token operator">:</span> <span class="token string">"my-site"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+</div>
     
   </body>
 </html>

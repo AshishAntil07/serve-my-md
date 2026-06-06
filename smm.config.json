@@ -1,7 +1,7 @@
 {
   "rootTitle": "Serve My MD Docs",
   "description": "Docs for serve-my-md.",
-  "baseRoute": "/",
+  "baseRoute": "/serve-my-md",
   "defaultTheme": "dark",
   "sortRoutes": true,
   "trimIndexFromPath": true,
@@ -19,5 +19,11 @@
       "url": "https://fonts.googleapis.com/css2?family=Commissioner:wght@100..900&display=swap"
     }
   },
-  "outDir": "docs"
+  "outDir": "docs",
+  "og": {
+    "title": "Serve My MD Docs",
+    "description": "Documentation for serve-my-md, a CLI tool to generate static docs sites from markdown.",
+    "type": "website",
+    "site_name": "Serve My MD Docs"
+  }
 }
