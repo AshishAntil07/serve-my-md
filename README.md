@@ -4,7 +4,7 @@ A tiny CLI to generate a static docs website from markdown files.
 
 ## Documentation
 
-Full docs are at [https://ashishantil.dev/serve-my-md](https://ashishantil.dev/serve-my-md).
+Full docs are at [https://serve-my-md.ashishantil.dev](https://serve-my-md.ashishantil.dev).
 
 ## Basic usage
 
