@@ -2,13 +2,23 @@
   "name": "serve-my-md",
   "version": "1.1.0",
   "type": "module",
-  "description": "A utility to create a static build for your markdown files",
+  "description": "Generate beautiful SEO-friendly static websites from Markdown files.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/AshishAntil07/serve-my-md.git"
   },
   "author": "AshishAntil07 <ashishantil.antil07@gmail.com>",
   "license": "MIT",
+  "keywords": [
+    "markdown",
+    "docs",
+    "documentation",
+    "ssg",
+    "documentation-generator",
+    "seo",
+    "vite",
+    "react"
+  ],
   "bin": {
     "serve-my-md": "bin/index.js"
   },
