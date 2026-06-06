@@ -19,7 +19,10 @@ export default defineConfig({
   ],
   root: fileURLToPath(new URL('.', import.meta.url)),
   build: {
-    outDir: out.outDir || "dist"
+    outDir: out.outDir || "dist",
+    rolldownOptions: {
+      external: ["@shared/constants.json", "@shared/index"]
+    }
   },
   resolve: {
     alias: {
