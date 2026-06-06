@@ -8,7 +8,7 @@ import {
   makeRoutesOfNestedPathsRaw,
   optional,
 } from "@/utils/index.js";
-import { cp, rm, writeFile } from "fs/promises";
+import { cp, readdir, rm, writeFile } from "fs/promises";
 import path, { resolve } from "path";
 import { fileURLToPath } from "url";
 import { build as viteBuild } from "vite";
@@ -92,6 +92,15 @@ export default async function build(options: Args): Promise<boolean> {
   logger.log("Generated HTML from template");
 
   if (!skipBuild) {
+    const entries = await readdir(path.join(webDir, PUBLIC_DIRNAME));
+
+    for (const entry of entries) {
+      await rm(path.join(webDir, PUBLIC_DIRNAME, entry), {
+        recursive: true,
+        force: true,
+      });
+    }
+
     if (finalConfig.publicPath) {
       if (
         await FileOrDirectoryExists(
