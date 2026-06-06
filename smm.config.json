@@ -18,5 +18,6 @@
       "name": "Commissioner",
       "url": "https://fonts.googleapis.com/css2?family=Commissioner:wght@100..900&display=swap"
     }
-  }
+  },
+  "outDir": "docs"
 }
