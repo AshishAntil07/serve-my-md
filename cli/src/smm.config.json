@@ -11,6 +11,7 @@
     "linkify": true,
     "typographer": false
   },
+  "outDir": "dist",
   "favicon": "",
   "logo": "",
   "name": "Serve My MD",

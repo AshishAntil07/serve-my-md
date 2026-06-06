@@ -282,7 +282,7 @@ export async function buildDistRoutesFromRouteTree(
       await fs.mkdir(path.dirname(distRoutePath), { recursive: true });
       const html = await generateHtml(
         distPath,
-        groupedRoutes[prefix + node.pathSegment]?.[0]?.content,
+        groupedRoutes[path.posix.join(prefix, node.pathSegment)]?.[0]?.content,
       );
       await fs.writeFile(distRoutePath, html, "utf-8");
 

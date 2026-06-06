@@ -21,7 +21,7 @@ import {
 } from "./index.js";
 import { mkdirSync } from "fs";
 
-const DIST_DIRNAME = "dist";
+const DIST_DIRNAME = finalConfig.outDir || "dist";
 const WEB_DIRNAME = "web";
 const PUBLIC_DIRNAME = "public";
 
@@ -58,6 +58,7 @@ export default async function build(options: Args): Promise<boolean> {
     name: finalConfig.name ?? "Serve My MD",
     showNameWithLogo: finalConfig.showNameWithLogo ?? false,
     routes,
+    outDir: DIST_DIRNAME,
     fonts: {
       title: finalConfig.fonts?.title?.name || "serif",
       body: finalConfig.fonts?.body?.name || "sans-serif",

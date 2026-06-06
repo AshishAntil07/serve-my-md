@@ -5,6 +5,7 @@ export interface SmmConfig {
   description?: string;
   markdownItOptions?: Record<string, any>;
   baseRoute?: string;
+  outDir?: string;
   publicPath?: string;
   defaultTheme?: string;
   favicon?: string;

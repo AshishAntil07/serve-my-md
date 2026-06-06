@@ -15,7 +15,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Serve My MD Docs">
     <title>Serve My MD Docs</title>
-    
+    <link rel="stylesheet" href="assets/index-qUN9r2e4.css" />
+             <script type="module" src="assets/index-CGuRb4gH.js"></script>
     
     <style>
       @keyframes keep-rotating {
@@ -60,7 +61,21 @@
     </style>
   </head>
   <body class='loading'>
-    <div id="app">__smm_static_temp_content__</div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="app">__smm_static_temp_content__<h1>.smmignore</h1>
+<p>Create <code>.smmignore</code> at docs root to skip paths during markdown traversal.</p>
+<p>Rules are glob-like, processed top-to-bottom.</p>
+<ul>
+<li>Lines starting with <code>#</code> are comments.</li>
+<li>Empty lines are ignored.</li>
+<li>Prefix with <code>!</code> to un-ignore.</li>
+</ul>
+<p>Example:</p>
+<pre class="language-text"><code class="language-text">drafts/**
+private/**
+!private/keep.md
+</code></pre>
+<p>Paths are evaluated against traversal targets in the docs tree; ignored paths are skipped during route/content generation.</p>
+</div>
+    
   </body>
 </html>

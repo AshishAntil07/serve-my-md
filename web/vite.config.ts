@@ -20,6 +20,9 @@ export default defineConfig({
     tsconfigPaths()
   ],
   root: fileURLToPath(new URL('.', import.meta.url)),
+  build: {
+    outDir: out.outDir || "dist"
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

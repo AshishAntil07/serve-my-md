@@ -15,7 +15,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Serve My MD Docs">
     <title>Serve My MD Docs</title>
-    
+    <link rel="stylesheet" href="assets/index-qUN9r2e4.css" />
+             <script type="module" src="assets/index-CGuRb4gH.js"></script>
     
     <style>
       @keyframes keep-rotating {
@@ -60,7 +61,35 @@
     </style>
   </head>
   <body class='loading'>
-    <div id="app">__smm_static_temp_content__</div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="app">__smm_static_temp_content__<h1>Structure Examples</h1>
+<h2>Group directory (not in pathname)</h2>
+<pre class="language-text"><code class="language-text">docs/
+  (Category)/
+    tos.md
+</code></pre>
+<p>Route: <code>/tos</code></p>
+<h2>Normal directory with landing page</h2>
+<pre class="language-text"><code class="language-text">docs/
+  features/
+    index.md
+    tea.md
+</code></pre>
+<p>Routes:</p>
+<ul>
+<li><code>/features</code></li>
+<li><code>/features/tea</code></li>
+</ul>
+<h2>Root landing page</h2>
+<pre class="language-text"><code class="language-text">docs/
+  index.md
+  about.md
+</code></pre>
+<p>Routes:</p>
+<ul>
+<li><code>/</code></li>
+<li><code>/about</code></li>
+</ul>
+</div>
+    
   </body>
 </html>

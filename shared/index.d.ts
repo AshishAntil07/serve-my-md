@@ -13,6 +13,7 @@ export interface Out {
     mono: string;
   };
   showNameWithLogo: boolean;
+  outDir: string;
   routes: Route[];
 }
 export interface Route {

@@ -15,7 +15,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Serve My MD Docs">
     <title>Serve My MD Docs</title>
-    
+    <link rel="stylesheet" href="assets/index-qUN9r2e4.css" />
+             <script type="module" src="assets/index-CGuRb4gH.js"></script>
     
     <style>
       @keyframes keep-rotating {
@@ -60,7 +61,25 @@
     </style>
   </head>
   <body class='loading'>
-    <div id="app">__smm_static_temp_content__</div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="app">__smm_static_temp_content__<h1>Markdown and Rendering</h1>
+<p>The CLI uses <code>markdown-it</code> and includes:</p>
+<ul>
+<li>footnotes support</li>
+<li>task lists support</li>
+</ul>
+<p>Code highlighting is enabled through Prism with language classes like <code>language-js</code>.</p>
+<p>Useful notes:</p>
+<ul>
+<li><code>linkify</code> is enabled by default in config options.</li>
+<li><code>fuzzyEmail</code> linkification is disabled.</li>
+<li>You can override markdown-it behavior via <code>markdownItOptions</code> in <code>smm.config.json</code>.</li>
+</ul>
+<p>Additional rendering behavior from the web app:</p>
+<ul>
+<li>Heading elements are assigned generated ids for anchor navigation.</li>
+<li>Other extracted elements can receive internal labels for in-page search scroll targets.</li>
+</ul>
+</div>
+    
   </body>
 </html>

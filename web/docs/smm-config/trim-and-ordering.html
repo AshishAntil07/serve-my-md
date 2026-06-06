@@ -15,7 +15,8 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Serve My MD Docs">
     <title>Serve My MD Docs</title>
-    
+    <link rel="stylesheet" href="assets/index-qUN9r2e4.css" />
+             <script type="module" src="assets/index-CGuRb4gH.js"></script>
     
     <style>
       @keyframes keep-rotating {
@@ -60,7 +61,29 @@
     </style>
   </head>
   <body class='loading'>
-    <div id="app">__smm_static_temp_content__</div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="app">__smm_static_temp_content__<h1>Trim and Ordering</h1>
+<p>Use numbered file names to force custom ordering:</p>
+<ul>
+<li><code>1. intro.md</code></li>
+<li><code>2. install.md</code></li>
+</ul>
+<p>When <code>trimIndexFromPath</code> is <code>true</code>, the numeric prefixes are removed from emitted route names while order stays controlled by your naming.</p>
+<p>Input files:</p>
+<pre class="language-text"><code class="language-text">1. blahblah.md
+2. blhalbhablah.md
+</code></pre>
+<p>Emitted routes:</p>
+<ul>
+<li><code>/blahblah</code></li>
+<li><code>/blhalbhablah</code></li>
+</ul>
+<p>If <code>trimIndexFromPath</code> is <code>false</code>, or not present, then the emitted routes would be:</p>
+<ul>
+<li><code>/1-blahblah</code></li>
+<li><code>/2-blhalbhablah</code></li>
+</ul>
+<p>If route sorting is enabled, routes are sorted lexicographically, with grouped <code>(Name)</code> directories ordered after regular names at the same level. Indexing can also be used for Grouper directories(directories whose names are enclosed within parenthesis) to determine their order.</p>
+</div>
+    
   </body>
 </html>
