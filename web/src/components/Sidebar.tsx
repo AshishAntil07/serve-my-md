@@ -9,7 +9,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader
 } from '@/components/ui/sidebar';
 import outJ from '@/.generated/output.json' with { type: 'json' };
@@ -64,7 +63,7 @@ export default function Sidebar() {
         );
       });
     };
-    return buildLinks(paths, '/');
+    return buildLinks(paths, out.baseRoute || "/");
   }, []);
 
   return (

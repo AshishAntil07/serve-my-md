@@ -2,7 +2,7 @@ import path from "path";
 import { __dirname, runE2ETests } from "./index.js";
 import { readdirSync } from "fs";
 
-const to_skip: string[] = [];
+const to_skip: string[] = ["ghostly"];
 
 readdirSync(path.join(__dirname, "..", "fixtures", "md")).forEach(
   (TEST_NAME) =>

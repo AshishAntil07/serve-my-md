@@ -46,7 +46,7 @@ export default async function build(options: Args): Promise<boolean> {
   );
 
   const routes = makeRoutesOfNestedPaths(routeTree).reduce(
-    (acc, path) => [...acc, ...(groupedRoutes[path] ?? [])],
+    (acc, pth) => [...acc, ...(groupedRoutes[pth] ?? []).map((r) => ({ ...r, path: path.join(finalConfig.baseRoute || "/", r.path)}))],
     [] as Route[],
   );
 

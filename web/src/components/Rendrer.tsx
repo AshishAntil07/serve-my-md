@@ -1,6 +1,5 @@
 import { useNavigate } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
-import Prism from 'prismjs';
 import { useHotkeys } from 'react-hotkeys-hook';
 
 import Bettercrumb from './Bettercrumb';
@@ -12,6 +11,8 @@ import { useIsMobile } from '@/hooks/useMobile';
 import { markElements, slugify } from '@/lib/utils';
 import Search from './Search';
 import ThemeSwitch from './ThemeSwitcher';
+import pathBrowser from 'path-browserify';
+import out from '@/.generated/output.json' with { type: 'json' };
 
 export default function Rendrer({
   path,
@@ -56,6 +57,11 @@ export default function Rendrer({
 
     const article = articleRef.current;
     article.querySelectorAll('a').forEach((elem: HTMLAnchorElement) => {
+      elem.setAttribute(
+        'href',
+        pathBrowser.join(out.baseRoute || '/', elem.getAttribute('href') || '')
+      );
+
       elem.addEventListener('click', (e) => {
         if (
           elem.getAttribute('href')?.startsWith('http://') ||
