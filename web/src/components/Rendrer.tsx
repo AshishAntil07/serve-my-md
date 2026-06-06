@@ -57,17 +57,18 @@ export default function Rendrer({
 
     const article = articleRef.current;
     article.querySelectorAll('a').forEach((elem: HTMLAnchorElement) => {
+      if (
+          elem.getAttribute('href')?.startsWith('http://') ||
+          elem.getAttribute('href')?.startsWith('https://')
+        )
+          return;
+
       elem.setAttribute(
         'href',
         pathBrowser.join(out.baseRoute || '/', elem.getAttribute('href') || '')
       );
 
       elem.addEventListener('click', (e) => {
-        if (
-          elem.getAttribute('href')?.startsWith('http://') ||
-          elem.getAttribute('href')?.startsWith('https://')
-        )
-          return;
         e.preventDefault();
         navigate({ to: elem.getAttribute('href') || '/' });
       });
