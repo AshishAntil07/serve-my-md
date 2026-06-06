@@ -1,7 +1,6 @@
 {
   "rootTitle": "Serve My MD Docs",
   "description": "Docs for serve-my-md.",
-  "baseRoute": "/serve-my-md",
   "defaultTheme": "dark",
   "sortRoutes": true,
   "trimIndexFromPath": true,
