@@ -7,6 +7,7 @@ A tiny CLI to generate a static docs website from markdown files.
 - [Why serve-my-md?](/why-serve-my-md)
 - [Getting Started](/getting-started)
 - [CLI Reference](/cli-reference)
+- [Key Behaviors](/key-behaviors)
 
 ### Guide
 

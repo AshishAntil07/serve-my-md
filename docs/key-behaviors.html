@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <meta name="theme-color" content="#000000" />
+    <meta
+    name="description"
+      content="Docs for serve-my-md."
+      />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,100..900;1,100..900&display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Commissioner:wght@100..900&display=swap" /><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap" />
+    <meta property="og:title" content="Serve My MD Docs">
+<meta property="og:description" content="Documentation for serve-my-md, a CLI tool to generate static docs sites from markdown.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Serve My MD Docs">
+    <title>Serve My MD Docs</title>
+    <link rel="stylesheet" href="assets/index-CxPd_56c.css" />
+             <script type="module" src="assets/index-Bq4ghxRh.js"></script>
+    
+    <style>
+      @keyframes keep-rotating {
+        from {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        to {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+
+      body.loading {
+        overflow: hidden;
+
+        &::before {
+          content: '';
+          position: fixed;
+          inset: 0;
+          z-index: 50;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: rgba(255, 255, 255, 0.8);
+          backdrop-filter: blur(4px);
+        }
+
+        &::after {
+          content: '';
+          position: fixed;
+          width: 4rem;
+          height: 4rem;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 51;
+          border: 4px solid #3498db;
+          border-top-color: transparent;
+          border-radius: 50%;
+          animation: keep-rotating 1s linear infinite;
+        }
+      }
+    </style>
+  </head>
+  <body class='loading'>
+    <div id="app">__smm_static_temp_content__<h1>Key Behaviors</h1>
+<h2>Internal links auto-prepend <code>baseRoute</code></h2>
+<p>When you set a <code>baseRoute</code> in <code>smm.config.json</code> (e.g. <code>/docs</code>), any internal markdown link (<code>[text](/some-page)</code>) automatically has that base prepended during navigation. You never need to manually prefix links with the base route — change it in one place and all links adapt.</p>
+<h2>Sorting and indexing</h2>
+<p>Pages, directories, and groupers are sorted automatically when <code>sortRoutes: true</code>:</p>
+<ol>
+<li><code>index.md</code> always comes first.</li>
+<li>Regular files and directories come next, sorted lexicographically.</li>
+<li>Groupers <code>(Name)</code> come last, after all regular items.</li>
+</ol>
+<p>Numeric prefixes on filenames (<code>1. intro.md</code>, <code>2. setup.md</code>) control ordering within each tier. The prefix is stripped from the emitted URL when <code>trimIndexFromPath: true</code>.</p>
+<p>Grouper indexes only affect order among other groupers — they never collide with file/directory indexes since groupers always sort after regular items.</p>
+<h2>SSG pre-rendering</h2>
+<p>Every page is a standalone <code>.html</code> file with pre-rendered markdown content baked into the DOM. Search engines see the full content immediately. After the page loads, the React SPA hydrates and takes over for seamless client-side navigation.</p>
+<h2>Groupers</h2>
+<p>Directories named <code>(Name)</code> act as groupers:</p>
+<ul>
+<li>Rendered as a labeled section in the sidebar (not collapsible).</li>
+<li>Skipped from URL pathnames — files inside sit at the grouper's parent URL level.</li>
+<li>Cannot contain <code>index.md</code>.</li>
+<li>Can be ordered with numeric prefixes: <code>(1. Guide)</code>, <code>(2. Reference)</code>.</li>
+</ul>
+<h2>Client-side link interception</h2>
+<p>Internal markdown links (<code>[text](/path)</code>) are intercepted by the SPA router — navigating them does not cause a full page reload. External links (<code>https://...</code>) open normally.</p>
+<h2>Intent-based preloading</h2>
+<p>When you hover over or touch a link, its content is preloaded in the background. Navigation feels instant because the data is ready before you click.</p>
+<h2>Auto-slug generation</h2>
+<p>Route path segments are automatically normalized:</p>
+<ul>
+<li>Lowercased</li>
+<li>Spaces and underscores become <code>-</code></li>
+<li>Punctuation (<code>.,;&quot;'\\:&lt;&gt;</code>?!`) is removed</li>
+<li>Grouper directory names like <code>(Group)</code> are excluded entirely</li>
+</ul>
+<p>No need to manually craft URL-safe filenames.</p>
+<h2><code>index.md</code> as landing page</h2>
+<ul>
+<li><code>index.md</code> represents the landing page for its directory.</li>
+<li>It is never included in the URL pathname — internally maps to <code>&quot;&quot;</code>.</li>
+<li>If a directory contains only <code>index.md</code> and no other files, it collapses to a leaf node (no collapsible).</li>
+</ul>
+<h2><code>publicPath</code> auto-copy and auto-exclude</h2>
+<p>If <code>publicPath</code> is set in config, that directory is:</p>
+<ul>
+<li>Copied into the web app's public assets before the Vite build.</li>
+<li>Automatically excluded from markdown scanning — no need to also add it to <code>.smmignore</code>.</li>
+</ul>
+<h2>Config merge with sensible defaults</h2>
+<p><code>smm.config.json</code> is merged over built-in defaults. You only need to specify what you want to override. Missing options fall back to the CLI's internal defaults — the config file is entirely optional.</p>
+<h2><code>.smmignore</code> glob patterns</h2>
+<p>Create <code>.smmignore</code> at your docs root to exclude paths during markdown traversal:</p>
+<ul>
+<li>Lines starting with <code>#</code> are comments.</li>
+<li>Empty lines are ignored.</li>
+<li>Prefix with <code>!</code> to un-ignore.</li>
+<li>Patterns are evaluated top-to-bottom, last match wins.</li>
+</ul>
+</div>
+    
+  </body>
+</html>
