@@ -1,6 +1,6 @@
 {
   "name": "serve-my-md",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "type": "module",
   "description": "Generate beautiful SEO-friendly static websites from Markdown files.",
   "repository": {
