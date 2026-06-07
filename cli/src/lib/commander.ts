@@ -2,6 +2,8 @@ import * as inquirer from "@inquirer/prompts";
 import config from "../config.json" with { type: "json" };
 import { Command } from "commander";
 import type { Args } from "@/types/index.js";
+import path from "path";
+import fs from "fs";
 
 const program = new Command();
 
@@ -27,5 +29,8 @@ if (options.interactive || options.directory === undefined) {
   });
   options.directory = res.trim();
 }
+
+options.directory = path.resolve(options.directory);
+fs.existsSync(options.directory) || (() => { console.error("Directory does not exist: " + options.directory); process.exit(1); })();
 
 export default program;
