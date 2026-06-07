@@ -59,7 +59,8 @@ export default function Rendrer({
     article.querySelectorAll('a').forEach((elem: HTMLAnchorElement) => {
       if (
           elem.getAttribute('href')?.startsWith('http://') ||
-          elem.getAttribute('href')?.startsWith('https://')
+          elem.getAttribute('href')?.startsWith('https://') ||
+          !out.routes.find((r) => r.path === elem.getAttribute('href'))
         )
           return;
 
