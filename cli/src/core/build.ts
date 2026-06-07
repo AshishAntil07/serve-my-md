@@ -19,7 +19,7 @@ import {
   generateHtml,
   buildDistRoutesFromRouteTree,
 } from "./index.js";
-import { mkdirSync } from "fs";
+import { mkdirSync, existsSync, mkdir } from "fs";
 
 const DIST_DIRNAME = finalConfig.outDir || "dist";
 const WEB_DIRNAME = "web";
@@ -98,13 +98,17 @@ export default async function build(options: Args): Promise<boolean> {
   logger.log("Generated HTML from template");
 
   if (!skipBuild) {
-    const entries = await readdir(path.join(webDir, PUBLIC_DIRNAME));
-
-    for (const entry of entries) {
-      await rm(path.join(webDir, PUBLIC_DIRNAME, entry), {
-        recursive: true,
-        force: true,
-      });
+    if(existsSync(path.join(webDir, PUBLIC_DIRNAME))) {
+      const entries = await readdir(path.join(webDir, PUBLIC_DIRNAME));
+  
+      for (const entry of entries) {
+        await rm(path.join(webDir, PUBLIC_DIRNAME, entry), {
+          recursive: true,
+          force: true,
+        });
+      }
+    } else {
+      mkdirSync(path.join(webDir, PUBLIC_DIRNAME));
     }
 
     if (finalConfig.publicPath) {
