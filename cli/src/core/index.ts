@@ -4,16 +4,15 @@ import type { IgnoreRule } from "@/types/index.js";
 import type { Route, RouteTree } from "@shared/index.js";
 import path from "path";
 import { minimatch } from "minimatch";
-import { finalConfig, mdParser, shouldIgnore } from "@/shared.js";
 import {
   cleanName,
   ogToHtml,
   slugify,
   trimIndexFromPath,
 } from "@/utils/index.js";
-import { options } from "@/lib/commander.js";
 import { readdir, readdirSync } from "fs";
 import constants from "@shared/constants.json" with { type: "json" };
+import { getState } from "@/lib/context.js";
 
 const STATIC_TEMP_CONTENT_PREFIX = constants.STATIC_TEMP_CONTENT_PREFIX;
 
@@ -75,8 +74,11 @@ export async function parseSmmIgnore(filePath: string) {
 
 export async function getMarkdownFiles(
   baseUrl: string,
+  options: any,
   pairChildren?: RouteTree[],
 ): Promise<string[] | { routeTree: RouteTree[]; files: string[] }> {
+  const state = getState();
+
   const files = await fs.readdir(baseUrl, { withFileTypes: true });
   const routeTree = pairChildren || [];
 
@@ -84,8 +86,8 @@ export async function getMarkdownFiles(
   for (const file of files) {
     const filePath = path.join(baseUrl, file.name);
     if (
-      shouldIgnore(filePath.slice(options.directory.length)) ||
-      filePath.slice(options.directory.length) === finalConfig.publicPath
+      state.shouldIgnore(filePath.slice(options.directory.length)) ||
+      filePath.slice(options.directory.length) === state.finalConfig.publicPath
     )
       continue;
 
@@ -100,7 +102,7 @@ export async function getMarkdownFiles(
       };
       routeTree.push(dirPair);
       promises.push(
-        getMarkdownFiles(filePath, dirPair.children as RouteTree[]),
+        getMarkdownFiles(filePath, options, dirPair.children as RouteTree[]),
       );
     } else if (file.name.endsWith(".md")) {
       routeTree.push({
@@ -112,7 +114,7 @@ export async function getMarkdownFiles(
     }
   }
 
-  if (finalConfig.sortRoutes)
+  if (state.finalConfig.sortRoutes)
     routeTree.sort((a, b) => {
       if (a.label === "index.md") return -1;
       if (b.label === "index.md") return 1;
@@ -123,7 +125,7 @@ export async function getMarkdownFiles(
       return a.label.localeCompare(b.label);
     });
 
-  const filess = finalConfig.trimIndexFromPath
+  const filess = state.finalConfig.trimIndexFromPath
     ? (await Promise.all(promises))
         .flat()
         .map((val) => trimIndexFromPath(val as string))
@@ -132,15 +134,17 @@ export async function getMarkdownFiles(
   return pairChildren ? filess : { routeTree, files: filess };
 }
 
-export function cleanNestedPaths(routeTree: RouteTree[]): void {
+export function cleanNestedPaths(routeTree: RouteTree[], options: any): void {
+  const state = getState();
+
   for (const pair of routeTree) {
-    if (finalConfig.trimIndexFromPath) {
+    if (state.finalConfig.trimIndexFromPath) {
       pair.label = trimIndexFromPath(pair.label);
     }
     pair.label = cleanName(pair.label);
-    pair.pathSegment = getPath(cleanName(pair.pathSegment)).replaceAll("/", "");
+    pair.pathSegment = getPath(cleanName(pair.pathSegment), options).replaceAll("/", "");
     if (pair.children) {
-      cleanNestedPaths(pair.children);
+      cleanNestedPaths(pair.children, options);
       if (
         pair.children?.length === 1 &&
         ["", "index.md"].includes(pair.children?.[0]?.label)
@@ -151,14 +155,16 @@ export function cleanNestedPaths(routeTree: RouteTree[]): void {
   }
 }
 
-export function getPath(filepath: string): string {
+export function getPath(filepath: string, options: any): string {
+  const state = getState();
+
   let transformedPath = filepath
     .replace(options.directory, "")
     .replace(/\\/g, "/")
     .replace(/\/index.md$/, "")
     .replace(/\.md$/, "");
 
-  if (finalConfig.trimIndexFromPath) {
+  if (state.finalConfig.trimIndexFromPath) {
     transformedPath = trimIndexFromPath(transformedPath);
   }
 
@@ -172,18 +178,22 @@ export function getPath(filepath: string): string {
 
 export async function parseMD(
   filepath: string,
+  options: any
 ): Promise<{ path: string; content: string }> {
-  const path = getPath(filepath);
+  const path = getPath(filepath, options);
   return {
     path,
-    content: mdParser.render(await fs.readFile(filepath, "utf-8")),
+    content: getState().mdParser.render(await fs.readFile(filepath, "utf-8")),
   };
 }
 
 export async function generateHtml(
   distDir?: string,
   routeContent?: string,
+  options?: any,
 ): Promise<string> {
+  const state = getState();
+
   try {
     let htmlTemplate = await fs.readFile(
       path.join(import.meta.dirname, "..", "index.html"),
@@ -230,26 +240,26 @@ export async function generateHtml(
     }
 
     return htmlTemplate
-      .replace("{{og}}", ogToHtml(finalConfig.og ?? {}))
-      .replace("{{title}}", finalConfig.rootTitle ?? "Serve My MD")
-      .replace("{{description}}", finalConfig.description ?? "")
+      .replace("{{og}}", ogToHtml(state.finalConfig.og ?? {}))
+      .replace("{{title}}", state.finalConfig.rootTitle ?? "Serve My MD")
+      .replace("{{description}}", state.finalConfig.description ?? "")
       .replace(
         "{{favicon}}",
-        finalConfig.favicon
-          ? `<link rel="icon" href="${finalConfig.favicon}" />`
+        state.finalConfig.favicon
+          ? `<link rel="icon" href="${state.finalConfig.favicon}" />`
           : "",
       )
       .replace(
         "{{fonts}}",
-        finalConfig.fonts
-          ? (finalConfig.fonts.title && finalConfig.fonts.title.url
-              ? `<link rel="stylesheet" href="${finalConfig.fonts.title.url}" />`
+        state.finalConfig.fonts
+          ? (state.finalConfig.fonts.title && state.finalConfig.fonts.title.url
+              ? `<link rel="stylesheet" href="${state.finalConfig.fonts.title.url}" />`
               : "") +
-              (finalConfig.fonts.body && finalConfig.fonts.body.url
-                ? `<link rel="stylesheet" href="${finalConfig.fonts.body.url}" />`
+              (state.finalConfig.fonts.body && state.finalConfig.fonts.body.url
+                ? `<link rel="stylesheet" href="${state.finalConfig.fonts.body.url}" />`
                 : "") +
-              (finalConfig.fonts.mono && finalConfig.fonts.mono.url
-                ? `<link rel="stylesheet" href="${finalConfig.fonts.mono.url}" />`
+              (state.finalConfig.fonts.mono && state.finalConfig.fonts.mono.url
+                ? `<link rel="stylesheet" href="${state.finalConfig.fonts.mono.url}" />`
                 : "")
           : "",
       )
@@ -264,6 +274,7 @@ export async function buildDistRoutesFromRouteTree(
   routeTree: RouteTree[],
   groupedRoutes: Partial<Record<string, Route[]>>,
   distPath: string,
+  options: any,
   prefix: string = "/",
 ): Promise<void> {
   for (const node of routeTree) {
@@ -272,6 +283,7 @@ export async function buildDistRoutesFromRouteTree(
         node.children,
         groupedRoutes,
         distPath,
+        options,
         prefix,
       );
     } else {
@@ -283,6 +295,7 @@ export async function buildDistRoutesFromRouteTree(
       const html = await generateHtml(
         distPath,
         groupedRoutes[path.posix.join(prefix, node.pathSegment)]?.[0]?.content,
+        options
       );
       await fs.writeFile(distRoutePath, html, "utf-8");
 
@@ -291,6 +304,7 @@ export async function buildDistRoutesFromRouteTree(
           node.children,
           groupedRoutes,
           distPath,
+          options,
           path.join(prefix, node.pathSegment),
         );
       }

@@ -17,7 +17,7 @@ export default async function takeSnapshots() {
       ...dirs.reduce(
         (acc, dir) => [
           ...acc,
-          `pnpm start -d ${path.join(fixtures, dir)} --skip-build`,
+          `pnpm start build -d ${path.join(fixtures, dir)} --skip-build`,
           `mkdir -p ${path.join(fixtures, dir, SNAPSHOT_DIRECTORY)}`,
           `cp ${path.join(WEB_DIR, "src", ".generated", "output.json")} ${path.join(fixtures, dir, SNAPSHOT_DIRECTORY, "output.json")}`,
           `cp ${path.join(WEB_DIR, "src", ".generated", "paths.json")} ${path.join(fixtures, dir, SNAPSHOT_DIRECTORY, "paths.json")}`,

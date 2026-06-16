@@ -1,5 +1,4 @@
 import logger from "@/lib/logger.js";
-import { finalConfig } from "@/shared.js";
 import type { Args } from "@/types/index.js";
 import type { Route, Out, RouteTree } from "@shared/index.js";
 import {
@@ -20,25 +19,33 @@ import {
   buildDistRoutesFromRouteTree,
 } from "./index.js";
 import { mkdirSync, existsSync, mkdir } from "fs";
+import { getState } from "@/lib/context.js";
 
-const DIST_DIRNAME = finalConfig.outDir || "dist";
-const WEB_DIRNAME = "web";
-const PUBLIC_DIRNAME = "public";
 
-export default async function build(options: Args): Promise<boolean> {
+export default async function build(): Promise<boolean> {
+  const state = getState();
+
+  const DIST_DIRNAME = state.finalConfig.outDir || "dist";
+  const WEB_DIRNAME = "web";
+  const PUBLIC_DIRNAME = "public";
+
+
+  const options = state.options as Args;
+
   const skipBuild = ("skipBuild" in options && options.skipBuild) ?? false;
 
   const { routeTree, files: markdownFiles } = (await getMarkdownFiles(
     options.directory,
+    options,
   )) as { routeTree: RouteTree[]; files: string[] };
 
   const parsePromises: Promise<Route>[] = [];
   logger.log("Processing routes...");
   for (const file of makeRoutesOfNestedPathsRaw(routeTree)) {
-    parsePromises.push(parseMD(path.join(options.directory, file)));
+    parsePromises.push(parseMD(path.join(options.directory, file), options));
   }
 
-  cleanNestedPaths(routeTree);
+  cleanNestedPaths(routeTree, options);
 
   const groupedRoutes = Object.groupBy(
     await Promise.all(parsePromises),
@@ -50,28 +57,28 @@ export default async function build(options: Args): Promise<boolean> {
       ...acc,
       ...(groupedRoutes[pth] ?? []).map((r) => ({
         ...r,
-        path: path.join(finalConfig.baseRoute || "/", r.path),
+        path: path.join(state.finalConfig.baseRoute || "/", r.path),
       })),
     ],
     [] as Route[],
   );
 
   const out: Out = {
-    rootTitle: finalConfig.rootTitle ?? "Documentation",
-    description: finalConfig.description ?? "Documentation",
-    baseRoute: finalConfig.baseRoute ?? "/",
-    defaultTheme: finalConfig.defaultTheme ?? "dark",
-    name: finalConfig.name ?? "Serve My MD",
-    showNameWithLogo: finalConfig.showNameWithLogo ?? false,
+    rootTitle: state.finalConfig.rootTitle ?? "Documentation",
+    description: state.finalConfig.description ?? "Documentation",
+    baseRoute: state.finalConfig.baseRoute ?? "/",
+    defaultTheme: state.finalConfig.defaultTheme ?? "dark",
+    name: state.finalConfig.name ?? "Serve My MD",
+    showNameWithLogo: state.finalConfig.showNameWithLogo ?? false,
     routes,
     outDir: DIST_DIRNAME,
     fonts: {
-      title: finalConfig.fonts?.title?.name || "serif",
-      body: finalConfig.fonts?.body?.name || "sans-serif",
-      mono: finalConfig.fonts?.mono?.name || "monospace",
+      title: state.finalConfig.fonts?.title?.name || "serif",
+      body: state.finalConfig.fonts?.body?.name || "sans-serif",
+      mono: state.finalConfig.fonts?.mono?.name || "monospace",
     },
-    ...optional("favicon", finalConfig.favicon),
-    ...optional("version", finalConfig.version),
+    ...optional("favicon", state.finalConfig.favicon),
+    ...optional("version", state.finalConfig.version),
   };
 
   routes.forEach((o) => {
@@ -111,20 +118,20 @@ export default async function build(options: Args): Promise<boolean> {
       mkdirSync(path.join(webDir, PUBLIC_DIRNAME));
     }
 
-    if (finalConfig.publicPath) {
+    if (state.finalConfig.publicPath) {
       if (
         await FileOrDirectoryExists(
-          path.join(options.directory, finalConfig.publicPath),
+          path.join(options.directory, state.finalConfig.publicPath),
         )
       ) {
-        logger.log(`Copying public assets from ${finalConfig.publicPath}...`);
+        logger.log(`Copying public assets from ${state.finalConfig.publicPath}...`);
         await cp(
-          path.join(options.directory, finalConfig.publicPath),
+          path.join(options.directory, state.finalConfig.publicPath),
           path.join(webDir, PUBLIC_DIRNAME),
           { recursive: true },
         );
       } else {
-        logger.error(`Public path "${finalConfig.publicPath}" does not exist!`);
+        logger.error(`Public path "${state.finalConfig.publicPath}" does not exist!`);
       }
     }
 
@@ -133,7 +140,7 @@ export default async function build(options: Args): Promise<boolean> {
       configFile: resolve(webDir, "vite.config.ts"),
     });
 
-    await buildDistRoutesFromRouteTree(routeTree, groupedRoutes, distDir);
+    await buildDistRoutesFromRouteTree(routeTree, groupedRoutes, distDir, options);
 
     const targetDist = path.join(options.directory, DIST_DIRNAME);
 

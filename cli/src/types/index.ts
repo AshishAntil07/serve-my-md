@@ -1,3 +1,4 @@
+import type MarkdownIt from "markdown-it";
 import type { OpenGraph } from "./og.js";
 
 export interface SmmConfig {
@@ -31,6 +32,20 @@ export interface SmmConfig {
     };
   };
 }
+
+export interface CommandState {
+  command: string;
+  handler: () => Promise<void>;
+  options: any;
+}
+
+export interface UtilState {
+  finalConfig: SmmConfig;
+  mdParser: MarkdownIt;
+  shouldIgnore: (targetPath: string) => boolean;
+}
+
+export type SharedState = CommandState & UtilState;
 
 export interface Args {
   directory: string;
