@@ -1,3 +1,7 @@
-import type { AnyContext, Register, ResolveParams, RootRoute, Route as rt } from "@tanstack/react-router";
+import type { RouteTree, StaticMeta } from "@shared/index";
 
-export type AppRoute = rt<unknown, RootRoute<Register, undefined, {}, AnyContext, AnyContext, {}, undefined, unknown, unknown, unknown, unknown, undefined>, string, "/", string, "__root__", undefined, ResolveParams<string>, AnyContext, AnyContext, AnyContext, {}, undefined, unknown, unknown, unknown, unknown, undefined>;
+export interface AppData {
+  meta: StaticMeta;
+  registry: Record<string, string>;
+  routeTree: Array<RouteTree>;
+}

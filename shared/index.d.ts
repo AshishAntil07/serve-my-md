@@ -1,4 +1,4 @@
-export interface Out {
+export interface StaticMeta {
   rootTitle: string;
   description: string;
   baseRoute: string;
@@ -13,12 +13,26 @@ export interface Out {
     mono: string;
   };
   showNameWithLogo: boolean;
-  outDir: string;
-  routes: Route[];
 }
 export interface Route {
   path: string;
   content: string;
+  identifier: string;
+  next?: string;
+  prev?: string;
+}
+
+export type SearchIndex = SearchIndexPage[];
+export interface SearchIndexPage {
+  route: string;
+  title: string;
+  sections: SearchIndexPageSection[];
+}
+export interface SearchIndexPageSection {
+  title: string;
+  anchor: string;
+  preview: string;
+  keywords: string[];
 }
 
 export type RouteTree = {

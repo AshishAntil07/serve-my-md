@@ -5,7 +5,6 @@ import { useHotkeys } from 'react-hotkeys-hook';
 
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import output from '@/.generated/output.json' with { type: 'json' };
 
 import type { Dispatch, SetStateAction } from 'react';
 import {

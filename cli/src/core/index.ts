@@ -1,18 +1,20 @@
 import fs from "fs/promises";
 import logger from "@/lib/logger.js";
 import type { IgnoreRule } from "@/types/index.js";
-import type { Route, RouteTree } from "@shared/index.js";
+import type { Route, RouteTree, SearchIndex, SearchIndexPage } from "@shared/index.js";
 import path from "path";
 import { minimatch } from "minimatch";
 import {
   cleanName,
+  makeRoutesOfNestedPaths,
   ogToHtml,
   slugify,
   trimIndexFromPath,
 } from "@/utils/index.js";
-import { readdir, readdirSync } from "fs";
+import { readdirSync } from "fs";
 import constants from "@shared/constants.json" with { type: "json" };
 import { getState } from "@/lib/context.js";
+import type { Writer } from "@/types/index.js";
 
 const STATIC_TEMP_CONTENT_PREFIX = constants.STATIC_TEMP_CONTENT_PREFIX;
 
@@ -74,7 +76,6 @@ export async function parseSmmIgnore(filePath: string) {
 
 export async function getMarkdownFiles(
   baseUrl: string,
-  options: any,
   pairChildren?: RouteTree[],
 ): Promise<string[] | { routeTree: RouteTree[]; files: string[] }> {
   const state = getState();
@@ -86,8 +87,9 @@ export async function getMarkdownFiles(
   for (const file of files) {
     const filePath = path.join(baseUrl, file.name);
     if (
-      state.shouldIgnore(filePath.slice(options.directory.length)) ||
-      filePath.slice(options.directory.length) === state.finalConfig.publicPath
+      state.shouldIgnore(filePath.slice(state.options.directory.length)) ||
+      filePath.slice(state.options.directory.length) ===
+        state.finalConfig.publicPath
     )
       continue;
 
@@ -102,7 +104,7 @@ export async function getMarkdownFiles(
       };
       routeTree.push(dirPair);
       promises.push(
-        getMarkdownFiles(filePath, options, dirPair.children as RouteTree[]),
+        getMarkdownFiles(filePath, dirPair.children as RouteTree[]),
       );
     } else if (file.name.endsWith(".md")) {
       routeTree.push({
@@ -134,7 +136,31 @@ export async function getMarkdownFiles(
   return pairChildren ? filess : { routeTree, files: filess };
 }
 
-export function cleanNestedPaths(routeTree: RouteTree[], options: any): void {
+export function getRouteFromPath(sourcePath: string): string {
+  const pathSegments = sourcePath.split("/").filter((segment) => !!segment);
+
+  const routeTree: RouteTree = {
+    label: "dummy",
+    pathSegment: "",
+    children: [],
+  };
+
+  let currentNode = routeTree;
+
+  pathSegments.forEach((segment, i) => {
+    currentNode.children!.push({
+      label: segment,
+      pathSegment: segment,
+      children: i === pathSegments.length - 1 ? null : [],
+    });
+    currentNode = currentNode.children![0];
+  });
+
+  cleanNestedPaths(routeTree.children!);
+  return makeRoutesOfNestedPaths(routeTree.children!)[0];
+}
+
+export function cleanNestedPaths(routeTree: RouteTree[]): void {
   const state = getState();
 
   for (const pair of routeTree) {
@@ -142,9 +168,10 @@ export function cleanNestedPaths(routeTree: RouteTree[], options: any): void {
       pair.label = trimIndexFromPath(pair.label);
     }
     pair.label = cleanName(pair.label);
-    pair.pathSegment = getPath(cleanName(pair.pathSegment), options).replaceAll("/", "");
+    pair.pathSegment = getPath(cleanName(pair.pathSegment)).replaceAll("/", "");
+
     if (pair.children) {
-      cleanNestedPaths(pair.children, options);
+      cleanNestedPaths(pair.children);
       if (
         pair.children?.length === 1 &&
         ["", "index.md"].includes(pair.children?.[0]?.label)
@@ -155,11 +182,11 @@ export function cleanNestedPaths(routeTree: RouteTree[], options: any): void {
   }
 }
 
-export function getPath(filepath: string, options: any): string {
+export function getPath(filepath: string): string {
   const state = getState();
 
   let transformedPath = filepath
-    .replace(options.directory, "")
+    .replace(state.options.directory, "")
     .replace(/\\/g, "/")
     .replace(/\/index.md$/, "")
     .replace(/\.md$/, "");
@@ -176,21 +203,9 @@ export function getPath(filepath: string, options: any): string {
   );
 }
 
-export async function parseMD(
-  filepath: string,
-  options: any
-): Promise<{ path: string; content: string }> {
-  const path = getPath(filepath, options);
-  return {
-    path,
-    content: getState().mdParser.render(await fs.readFile(filepath, "utf-8")),
-  };
-}
-
 export async function generateHtml(
   distDir?: string,
   routeContent?: string,
-  options?: any,
 ): Promise<string> {
   const state = getState();
 
@@ -214,8 +229,13 @@ export async function generateHtml(
 
       const cssFile = files.find((file) => file.endsWith(".css"));
       const jsFile = files.find((file) => file.endsWith(".js"));
-      const prefix = distDir.slice(path.join(import.meta.dirname, options.directory).length);
-      htmlTemplate = htmlTemplate.replace(`<script type="module" src="/src/main.tsx"></script>`, "");
+      const prefix = distDir.slice(
+        path.join(import.meta.dirname, state.options.directory).length,
+      );
+      htmlTemplate = htmlTemplate.replace(
+        `<script type="module" src="/src/main.tsx"></script>`,
+        "",
+      );
 
       if (cssFile && jsFile) {
         htmlTemplate = htmlTemplate.replace(
@@ -274,40 +294,32 @@ export async function buildDistRoutesFromRouteTree(
   routeTree: RouteTree[],
   groupedRoutes: Partial<Record<string, Route[]>>,
   distPath: string,
-  options: any,
+  write: Writer,
   prefix: string = "/",
 ): Promise<void> {
   for (const node of routeTree) {
-    if (node.children && node.isGrouper) {
+    if (node.children) {
       await buildDistRoutesFromRouteTree(
         node.children,
         groupedRoutes,
         distPath,
-        options,
-        prefix,
+        write,
+        path.join(prefix, node.isGrouper ? "" : node.pathSegment),
       );
     } else {
       const distRoutePath =
-        path.join(distPath, prefix, node.pathSegment.replace("/", "")) +
-        (node.pathSegment === "" ? "/index.html" : ".html");
+        path.join(
+          distPath,
+          prefix,
+          node.pathSegment.replace("/", ""),
+          node.pathSegment ? "" : "/index.html",
+        ) + (node.pathSegment === "" ? "" : ".html");
 
-      await fs.mkdir(path.dirname(distRoutePath), { recursive: true });
       const html = await generateHtml(
         distPath,
         groupedRoutes[path.posix.join(prefix, node.pathSegment)]?.[0]?.content,
-        options
       );
-      await fs.writeFile(distRoutePath, html, "utf-8");
-
-      if (node.children) {
-        await buildDistRoutesFromRouteTree(
-          node.children,
-          groupedRoutes,
-          distPath,
-          options,
-          path.join(prefix, node.pathSegment),
-        );
-      }
+      await write(distRoutePath, html, "text/html");
     }
   }
 }

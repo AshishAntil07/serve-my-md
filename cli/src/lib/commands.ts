@@ -1,5 +1,6 @@
 import build from "@/core/build.js";
 import { logger } from "./index.js";
+import dev from "@/core/dev.js";
 
 const commands = {
   async build() {
@@ -10,7 +11,9 @@ const commands = {
     }
   },
   async dev() {
-    //todo
+    dev().catch((err) => {
+      logger.error(`Development server crashed: ${err}`);
+    })
   },
 };
 

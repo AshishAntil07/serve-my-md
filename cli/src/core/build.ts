@@ -1,16 +1,15 @@
 import logger from "@/lib/logger.js";
-import type { Args } from "@/types/index.js";
-import type { Route, Out, RouteTree } from "@shared/index.js";
+import type { BuildArgs, SharedState, Writer } from "@/types/index.js";
+import type { Route, StaticMeta, RouteTree, SearchIndex } from "@shared/index.js";
 import {
   FileOrDirectoryExists,
   makeRoutesOfNestedPaths,
   makeRoutesOfNestedPathsRaw,
   optional,
 } from "@/utils/index.js";
-import { cp, readdir, rm, writeFile } from "fs/promises";
-import path, { resolve } from "path";
+import { cp, mkdir, rm, writeFile } from "fs/promises";
+import path from "path";
 import { fileURLToPath } from "url";
-import { build as viteBuild } from "vite";
 import {
   getMarkdownFiles,
   cleanNestedPaths,
@@ -18,37 +17,108 @@ import {
   generateHtml,
   buildDistRoutesFromRouteTree,
 } from "./index.js";
-import { mkdirSync, existsSync, mkdir } from "fs";
+import { mkdirSync } from "fs";
 import { getState } from "@/lib/context.js";
-
+import { DIST_DIRNAME, distDir } from "@/constants.js";
 
 export default async function build(): Promise<boolean> {
   const state = getState();
+  const options = state.options as BuildArgs;
 
-  const DIST_DIRNAME = state.finalConfig.outDir || "dist";
-  const WEB_DIRNAME = "web";
-  const PUBLIC_DIRNAME = "public";
+  const targetDist = path.join(
+    options.directory,
+    state.finalConfig.outDir || DIST_DIRNAME,
+  );
 
+  await rm(targetDist, { recursive: true }).catch(() => {});
 
-  const options = state.options as Args;
+  const isCopied = await cp(distDir, targetDist, { recursive: true })
+    .then(() => {
+      return true;
+    })
+    .catch((err) => {
+      logger.error("Error copying dist files: " + err);
+      return false;
+    });
 
-  const skipBuild = ("skipBuild" in options && options.skipBuild) ?? false;
+  if (state.finalConfig.publicPath) {
+    if (
+      await FileOrDirectoryExists(
+        path.join(options.directory, state.finalConfig.publicPath),
+      )
+    ) {
+      logger.log(
+        `Copying public assets from ${state.finalConfig.publicPath}...`,
+      );
+      cp(
+        path.join(options.directory, state.finalConfig.publicPath),
+        path.join(targetDist),
+        { recursive: true },
+      ).catch(err => {
+        logger.error("Error copying public files: " + err);
+      });
+    } else {
+      logger.error(
+        `Public path "${state.finalConfig.publicPath}" does not exist!`,
+      );
+    }
+  }
+
+  if (!isCopied) {
+    return Promise.reject(
+      new Error("Failed to copy built files to target directory."),
+    );
+  }
+
+  return buildSite(
+    options,
+    state,
+    async (filePath: string, content: string) => {
+      await mkdir(path.dirname(filePath), { recursive: true });
+      await writeFile(filePath, content, "utf-8");
+    },
+  );
+}
+
+export async function buildSite(
+  options: BuildArgs,
+  state: SharedState,
+  write: Writer,
+): Promise<boolean> {
+  const targetDist = path.join(
+    options.directory,
+    state.finalConfig.outDir || DIST_DIRNAME,
+  );
 
   const { routeTree, files: markdownFiles } = (await getMarkdownFiles(
     options.directory,
-    options,
   )) as { routeTree: RouteTree[]; files: string[] };
 
-  const parsePromises: Promise<Route>[] = [];
+  const parsePromises: ReturnType<typeof parseMD>[] = [];
   logger.log("Processing routes...");
   for (const file of makeRoutesOfNestedPathsRaw(routeTree)) {
-    parsePromises.push(parseMD(path.join(options.directory, file), options));
+    parsePromises.push(parseMD(path.join(options.directory, file)));
   }
 
-  cleanNestedPaths(routeTree, options);
+  logger.log("parsed routes", "debug");
+
+  //? all operations on routeTree before this comment are when routeTree is still in its raw state, with pathSegments and labels as they were read from the filesystem.
+
+  cleanNestedPaths(routeTree);
+
+  logger.log("cleaned routeTree", "debug");
+
+  const {searchIndex, parsedRoutes} = (await Promise.all(parsePromises)).reduce(
+    (acc, {searchIndex, route}) => {
+      acc.searchIndex.push(searchIndex);
+      acc.parsedRoutes.push(route);
+      return acc;
+    },
+    { searchIndex: [] as SearchIndex, parsedRoutes: [] as Route[] }
+  );
 
   const groupedRoutes = Object.groupBy(
-    await Promise.all(parsePromises),
+    parsedRoutes,
     (route) => route.path,
   );
 
@@ -58,20 +128,24 @@ export default async function build(): Promise<boolean> {
       ...(groupedRoutes[pth] ?? []).map((r) => ({
         ...r,
         path: path.join(state.finalConfig.baseRoute || "/", r.path),
-      })),
+      })), //? groupedRoutes[pth] is an array of a single route object.
     ],
     [] as Route[],
   );
+  for(let i = 0; i < routes.length; i++) {
+    routes[i].next = routes[i + 1]?.path;
+    routes[i].prev = routes[i - 1]?.path;
+  }
 
-  const out: Out = {
+  logger.log("made routes", "debug");
+
+  const staticMeta: StaticMeta = {
     rootTitle: state.finalConfig.rootTitle ?? "Documentation",
     description: state.finalConfig.description ?? "Documentation",
     baseRoute: state.finalConfig.baseRoute ?? "/",
     defaultTheme: state.finalConfig.defaultTheme ?? "dark",
     name: state.finalConfig.name ?? "Serve My MD",
     showNameWithLogo: state.finalConfig.showNameWithLogo ?? false,
-    routes,
-    outDir: DIST_DIRNAME,
     fonts: {
       title: state.finalConfig.fonts?.title?.name || "serif",
       body: state.finalConfig.fonts?.body?.name || "sans-serif",
@@ -85,78 +159,61 @@ export default async function build(): Promise<boolean> {
     logger.log(o.path);
   });
 
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-  const webDir = path.join(__dirname, "..", WEB_DIRNAME);
-  const distDir = path.join(webDir, DIST_DIRNAME);
-
-  mkdirSync(path.join(webDir, "src", ".generated"), { recursive: true });
-
-  await writeFile(
-    path.join(webDir, "src", ".generated", "output.json"),
-    JSON.stringify(out),
-  );
-  await writeFile(
-    path.join(webDir, "src", ".generated", "paths.json"),
+  await write(
+    path.join(targetDist, "page_data", "paths.json"),
     JSON.stringify(routeTree),
+    "application/json",
   );
-  logger.log("\nParsed MDs");
-  await writeFile(path.join(webDir, "index.html"), await generateHtml());
-  logger.log("Generated HTML from template");
+  await write(
+    path.join(targetDist, "page_data", "meta.json"),
+    JSON.stringify(staticMeta),
+    "application/json"
+  );
 
-  if (!skipBuild) {
-    if(existsSync(path.join(webDir, PUBLIC_DIRNAME))) {
-      const entries = await readdir(path.join(webDir, PUBLIC_DIRNAME));
-  
-      for (const entry of entries) {
-        await rm(path.join(webDir, PUBLIC_DIRNAME, entry), {
-          recursive: true,
-          force: true,
-        });
-      }
-    } else {
-      mkdirSync(path.join(webDir, PUBLIC_DIRNAME));
-    }
+  //? route registry, maps route path to json file identifier name.
+  await write(
+    path.join(targetDist, "page_data", "registry.json"),
+    JSON.stringify(
+      routes.map((r) => ({ path: r.path, identifier: r.identifier })),
+    ),
+    "application/json",
+  );
 
-    if (state.finalConfig.publicPath) {
-      if (
-        await FileOrDirectoryExists(
-          path.join(options.directory, state.finalConfig.publicPath),
-        )
-      ) {
-        logger.log(`Copying public assets from ${state.finalConfig.publicPath}...`);
-        await cp(
-          path.join(options.directory, state.finalConfig.publicPath),
-          path.join(webDir, PUBLIC_DIRNAME),
-          { recursive: true },
-        );
-      } else {
-        logger.error(`Public path "${state.finalConfig.publicPath}" does not exist!`);
-      }
-    }
-
-    logger.log("Building the app...");
-    await viteBuild({
-      configFile: resolve(webDir, "vite.config.ts"),
-    });
-
-    await buildDistRoutesFromRouteTree(routeTree, groupedRoutes, distDir, options);
-
-    const targetDist = path.join(options.directory, DIST_DIRNAME);
-
-    await rm(targetDist, { recursive: true }).catch(() => {});
-
-    logger.log("Built the app, copying results...");
-    return cp(distDir, targetDist, { recursive: true })
-      .then(() => {
-        logger.log("Done successfully!");
-        return true;
-      })
-      .catch((err) => {
-        logger.error("Error copying files: " + err);
-        return false;
-      });
+  const writePromises = [];
+  for (const route of routes) {
+    writePromises.push(
+      write(
+        path.join(
+          targetDist,
+          "page_data",
+          "routes",
+          `${route.identifier}.json`,
+        ),
+        JSON.stringify(route),
+        "application/json"
+      ),
+    );
   }
+
+  writePromises.push(
+    write(path.join(targetDist, "index.html"), await generateHtml(targetDist), "text/html"),
+  );
+
+  try {
+    await Promise.all(writePromises);
+  } catch (error) {
+    logger.error("Error writing route files: " + error);
+    throw error;
+  }
+
+  logger.log("\nParsed MDs");
+
+  await buildDistRoutesFromRouteTree(
+    routeTree,
+    groupedRoutes,
+    targetDist,
+    write,
+  );
 
   return Promise.resolve(true);
 }

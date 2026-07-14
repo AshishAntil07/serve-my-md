@@ -47,10 +47,23 @@ export interface UtilState {
 
 export type SharedState = CommandState & UtilState;
 
-export interface Args {
+export type Writer = (filePath: string, content: string, contentType: string) => Promise<void>;
+
+export type VirtualFileEntry = {
+  content: Buffer | string | (() => VirtualFileEntry);
+  contentType: string;
+};
+export type VirtualFileRegistry = Map<string, VirtualFileEntry>;
+
+
+export interface BuildArgs {
   directory: string;
-  skipBuild?: boolean;
   interactive: boolean;
+}
+
+export interface DevArgs {
+  port: string;
+  directory: string;
 }
 
 export type IgnoreRule = {

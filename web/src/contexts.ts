@@ -1,10 +1,11 @@
 import { createContext } from 'react'
 import type { RouteTree } from '@shared/index'
-import paths from "@/.generated/paths.json" with { type: "json" };
+import RoutesCache from './lib/routesCache';
 
 export const pageContext = createContext({
   path: '',
   id: '',
 })
 
-export const pathsContext = createContext<Array<RouteTree>>(paths as Array<RouteTree>);
+export const pathsContext = createContext<Array<RouteTree>>([] as Array<RouteTree>);
+export const routesCacheContext = createContext<RoutesCache>(new RoutesCache());

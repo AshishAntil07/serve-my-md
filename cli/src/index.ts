@@ -1,7 +1,7 @@
 import * as inquirer from "@inquirer/prompts";
 import config from "./config.json" with { type: "json" };
 import { Command } from "commander";
-import { type SharedState, type Args } from "@/types/index.js";
+import { type SharedState } from "@/types/index.js";
 import path from "path";
 import fs from "fs";
 import commands from "./lib/commands.js";
@@ -25,10 +25,6 @@ const partialState = await new Promise<CommandState>(async (resolve) => {
     .version(config.version);
 
   const buildCommand = program.command("build");
-
-  if (process.env.VITEST) {
-    buildCommand.option("--skip-build", "Skip the build step");
-  }
 
   buildCommand
     .option(

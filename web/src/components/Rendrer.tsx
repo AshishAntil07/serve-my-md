@@ -11,10 +11,41 @@ import { useIsMobile } from '@/hooks/useMobile';
 import { markElements, slugify } from '@/lib/utils';
 import Search from './Search';
 import ThemeSwitch from './ThemeSwitcher';
-import pathBrowser from 'path-browserify';
-import out from '@/.generated/output.json' with { type: 'json' };
+import { useBaseStore } from '@/store/base.store';
+import { Skeleton } from './ui/skeleton';
 
-export default function Rendrer({
+export default function Handler() {
+  const baseStore = useBaseStore();
+
+  return baseStore.currentRoute ? (
+    <Rendrer
+      path={baseStore.currentRoute?.path || ''}
+      content={baseStore.currentRoute?.content || ''}
+      next={baseStore.currentRoute?.next}
+      prev={baseStore.currentRoute?.prev}
+      title={''}
+    />
+  ) : (
+    <>
+      <Skeleton className="h-10 w-1/3 mb-4" />
+      <Skeleton className="h-4 w-full mb-2" />
+      <Skeleton className="h-4 w-full mb-2" />
+      <Skeleton className="h-4 w-4/7 mb-2" />
+      <Skeleton className="h-80 w-96 mb-2" />
+      <Skeleton className="h-4 w-full mb-2" />
+      <Skeleton className="h-4 w-full mb-2" />
+      <Skeleton className="h-4 w-full mb-2" />
+      <Skeleton className="h-4 w-4/7 mb-2" />
+
+      <div className="flex justify-between mt-10 w-full">
+        <Skeleton className="h-10 w-1/3" />
+        <Skeleton className="h-10 w-1/3" />
+      </div>
+    </>
+  );
+}
+
+export function Rendrer({
   path,
   content,
   next,
@@ -58,16 +89,11 @@ export default function Rendrer({
     const article = articleRef.current;
     article.querySelectorAll('a').forEach((elem: HTMLAnchorElement) => {
       if (
-          elem.getAttribute('href')?.startsWith('http://') ||
-          elem.getAttribute('href')?.startsWith('https://') ||
-          !out.routes.find((r) => r.path === elem.getAttribute('href'))
-        )
-          return;
-
-      elem.setAttribute(
-        'href',
-        pathBrowser.join(out.baseRoute || '/', elem.getAttribute('href') || '')
-      );
+        elem.getAttribute('href')?.startsWith('http://') ||
+        elem.getAttribute('href')?.startsWith('https://')
+        // !out.routes.find((r) => r.path === elem.getAttribute('href'))
+      )
+        return;
 
       elem.addEventListener('click', (e) => {
         e.preventDefault();

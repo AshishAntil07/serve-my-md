@@ -50,8 +50,12 @@
     "prepublishOnly": "pnpm build"
   },
   "devDependencies": {
+    "@types/mime-types": "^3.0.1",
     "@types/node": "^24.10.1",
-    "tsup": "^8.5.1"
+    "@types/ws": "^8.18.1",
+    "chokidar": "^5.0.0",
+    "tsup": "^8.5.1",
+    "zustand": "^5.0.14"
   },
   "dependencies": {
     "@inquirer/prompts": "^7.10.1",
@@ -88,6 +92,7 @@
     "markdown-it-github-headings": "^2.0.1",
     "markdown-it-prism": "^3.0.1",
     "markdown-it-task-lists": "^2.1.1",
+    "mime-types": "^3.0.2",
     "minimatch": "^10.2.0",
     "path-browserify": "^1.0.1",
     "prettier": "^3.6.2",
@@ -102,10 +107,10 @@
     "vite": "^8.0.16",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.0.15",
-    "web-vitals": "^5.1.0"
+    "web-vitals": "^5.1.0",
+    "ws": "^8.21.0"
   },
   "volta": {
-    "node": "26.1.0",
-    "npm": "11.15.0"
+    "node": "26.4.0"
   }
 }
