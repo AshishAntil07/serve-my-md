@@ -1,17 +1,29 @@
-import type { SharedState } from "@/types/index.js";
+import type { RouteState, SharedState } from "@/types/index.js";
 
-const context: {state: SharedState | null} = {
-  state: null
-};
+class State<T> {
+  name;
+  private context: {state: T | null};
 
-export function setState(newState: SharedState) {
-  context.state = { ...(context.state || {}), ...newState };
-}
-
-export function getState(): SharedState {
-  if (!context.state) {
-    throw new Error("State accessed before initialization!");
+  /**
+   * @param name This is only for logging purposes, and would help in debugging in case the state is accessed before initialization.
+   */
+  constructor(name: string) {
+    this.name = name;
+    this.context = { state: null };
   }
-
-  return context.state;
+  
+  getState(): T {
+    if (!this.context.state) {
+      throw new Error(this.name + " state accessed before initialization!");
+    }
+  
+    return this.context.state;
+  }
+  
+  setState(newState: T) {
+    this.context.state = { ...(this.context.state || {}), ...newState };
+  }
 }
+
+export const appState = new State<SharedState>("App");
+export const routeState = new State<RouteState>("Route");

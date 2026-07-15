@@ -47,6 +47,10 @@ export interface UtilState {
 
 export type SharedState = CommandState & UtilState;
 
+export type RouteState = {
+  routes: string[];
+}
+
 export type Writer = (filePath: string, content: string, contentType: string) => Promise<void>;
 
 export type VirtualFileEntry = {

@@ -14,7 +14,7 @@ import type { CommandState, SmmConfig } from "./types/index.js";
 import MarkdownItFootNote from "markdown-it-footnote";
 import MarkdownItTasks from "markdown-it-task-lists";
 import loadLanguages from "prismjs/components/index.js";
-import { setState } from "./lib/context.js";
+import { appState } from "./lib/context.js";
 
 const partialState = await new Promise<CommandState>(async (resolve) => {
   const program = new Command();
@@ -119,7 +119,7 @@ const state: SharedState = {
   shouldIgnore,
 };
 
-setState(state);
+appState.setState(state);
 
 state.handler().catch((err) => {
   logger.error("Error executing command: " + JSON.stringify(err));

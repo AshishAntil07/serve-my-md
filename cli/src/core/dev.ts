@@ -1,4 +1,4 @@
-import { getState } from "@/lib/context.js";
+import { appState } from "@/lib/context.js";
 import type { DevArgs, VirtualFileRegistry } from "@/types/index.js";
 import { createServer, IncomingMessage, ServerResponse } from "http";
 import { WebSocketServer } from "ws";
@@ -40,7 +40,7 @@ const wsInjection = `<script>
 </script>`;
 
 export default async function dev(): Promise<void> {
-  const state = getState();
+  const state = appState.getState();
   const { directory, port } = state.options as DevArgs;
 
   const virtualFileRegistry: VirtualFileRegistry = new Map();
@@ -87,7 +87,7 @@ export default async function dev(): Promise<void> {
 
 async function buildVirtualFileRegistry(
   directory: string,
-  state: ReturnType<typeof getState>,
+  state: ReturnType<typeof appState.getState>,
   virtualFileRegistry: VirtualFileRegistry,
 ): Promise<VirtualFileRegistry> {
   const targetDist = path.join(
@@ -178,7 +178,7 @@ async function buildVirtualFileRegistry(
 
 function devHandler(context: { virtualFileRegistry: VirtualFileRegistry }) {
   const { virtualFileRegistry } = context;
-  const state = getState();
+  const state = appState.getState();
   const baseUrl = state.finalConfig.baseRoute || "/";
 
   return (

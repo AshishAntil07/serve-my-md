@@ -13,7 +13,7 @@ import {
 } from "@/utils/index.js";
 import { readdirSync } from "fs";
 import constants from "@shared/constants.json" with { type: "json" };
-import { getState } from "@/lib/context.js";
+import { appState } from "@/lib/context.js";
 import type { Writer } from "@/types/index.js";
 
 const STATIC_TEMP_CONTENT_PREFIX = constants.STATIC_TEMP_CONTENT_PREFIX;
@@ -78,7 +78,7 @@ export async function getMarkdownFiles(
   baseUrl: string,
   pairChildren?: RouteTree[],
 ): Promise<string[] | { routeTree: RouteTree[]; files: string[] }> {
-  const state = getState();
+  const state = appState.getState();
 
   const files = await fs.readdir(baseUrl, { withFileTypes: true });
   const routeTree = pairChildren || [];
@@ -161,7 +161,7 @@ export function getRouteFromPath(sourcePath: string): string {
 }
 
 export function cleanNestedPaths(routeTree: RouteTree[]): void {
-  const state = getState();
+  const state = appState.getState();
 
   for (const pair of routeTree) {
     if (state.finalConfig.trimIndexFromPath) {
@@ -183,7 +183,7 @@ export function cleanNestedPaths(routeTree: RouteTree[]): void {
 }
 
 export function getPath(filepath: string): string {
-  const state = getState();
+  const state = appState.getState();
 
   let transformedPath = filepath
     .replace(state.options.directory, "")
@@ -207,7 +207,7 @@ export async function generateHtml(
   distDir?: string,
   routeContent?: string,
 ): Promise<string> {
-  const state = getState();
+  const state = appState.getState();
 
   try {
     let htmlTemplate = await fs.readFile(

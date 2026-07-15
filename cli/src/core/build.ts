@@ -9,20 +9,18 @@ import {
 } from "@/utils/index.js";
 import { cp, mkdir, rm, writeFile } from "fs/promises";
 import path from "path";
-import { fileURLToPath } from "url";
 import {
   getMarkdownFiles,
   cleanNestedPaths,
-  parseMD,
   generateHtml,
   buildDistRoutesFromRouteTree,
 } from "./index.js";
-import { mkdirSync } from "fs";
-import { getState } from "@/lib/context.js";
+import { parseMD } from "./processor.js";
+import { appState } from "@/lib/context.js";
 import { DIST_DIRNAME, distDir } from "@/constants.js";
 
 export default async function build(): Promise<boolean> {
-  const state = getState();
+  const state = appState.getState();
   const options = state.options as BuildArgs;
 
   const targetDist = path.join(
@@ -90,7 +88,7 @@ export async function buildSite(
     state.finalConfig.outDir || DIST_DIRNAME,
   );
 
-  const { routeTree, files: markdownFiles } = (await getMarkdownFiles(
+  const { routeTree, files: _markdowFiles } = (await getMarkdownFiles(
     options.directory,
   )) as { routeTree: RouteTree[]; files: string[] };
 
@@ -108,7 +106,7 @@ export async function buildSite(
 
   logger.log("cleaned routeTree", "debug");
 
-  const {searchIndex, parsedRoutes} = (await Promise.all(parsePromises)).reduce(
+  const {searchIndex: _searchIndex, parsedRoutes} = (await Promise.all(parsePromises)).reduce(
     (acc, {searchIndex, route}) => {
       acc.searchIndex.push(searchIndex);
       acc.parsedRoutes.push(route);
