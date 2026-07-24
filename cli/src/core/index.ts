@@ -88,7 +88,7 @@ export async function getMarkdownFiles(
     const filePath = path.join(baseUrl, file.name);
     if (
       state.shouldIgnore(filePath.slice(state.options.directory.length)) ||
-      filePath.slice(state.options.directory.length) ===
+      filePath ===
         state.finalConfig.publicPath
     )
       continue;
@@ -127,11 +127,13 @@ export async function getMarkdownFiles(
       return a.label.localeCompare(b.label);
     });
 
-  const filess = state.finalConfig.trimIndexFromPath
-    ? (await Promise.all(promises))
-        .flat()
-        .map((val) => trimIndexFromPath(val as string))
-    : ((await Promise.all(promises)).flat() as string[]);
+  const filess = ((await Promise.all(promises)).flat() as string[]);
+
+  // const filess = state.finalConfig.trimIndexFromPath
+  //   ? (await Promise.all(promises))
+  //       .flat()
+  //       .map((val) => trimIndexFromPath(val as string))
+  //   : ((await Promise.all(promises)).flat() as string[]);
 
   return pairChildren ? filess : { routeTree, files: filess };
 }
@@ -182,6 +184,9 @@ export function cleanNestedPaths(routeTree: RouteTree[]): void {
   }
 }
 
+/**
+ * if you want a full-fledged final output route/path string use `getRouteFromPath` instead.
+ */
 export function getPath(filepath: string): string {
   const state = appState.getState();
 

@@ -1,11 +1,17 @@
 import logger from "@/lib/logger.js";
 import type { BuildArgs, SharedState, Writer } from "@/types/index.js";
-import type { Route, StaticMeta, RouteTree, SearchIndex } from "@shared/index.js";
+import type {
+  Route,
+  StaticMeta,
+  RouteTree,
+  SearchIndex,
+} from "@shared/index.js";
 import {
   FileOrDirectoryExists,
   makeRoutesOfNestedPaths,
   makeRoutesOfNestedPathsRaw,
   optional,
+  promiseAll,
 } from "@/utils/index.js";
 import { cp, mkdir, rm, writeFile } from "fs/promises";
 import path from "path";
@@ -14,9 +20,10 @@ import {
   cleanNestedPaths,
   generateHtml,
   buildDistRoutesFromRouteTree,
+  getRouteFromPath,
 } from "./index.js";
 import { parseMD } from "./processor.js";
-import { appState } from "@/lib/context.js";
+import { appState, routeState } from "@/lib/context.js";
 import { DIST_DIRNAME, distDir } from "@/constants.js";
 
 export default async function build(): Promise<boolean> {
@@ -42,17 +49,17 @@ export default async function build(): Promise<boolean> {
   if (state.finalConfig.publicPath) {
     if (
       await FileOrDirectoryExists(
-        path.join(options.directory, state.finalConfig.publicPath),
+        state.finalConfig.publicPath,
       )
     ) {
       logger.log(
         `Copying public assets from ${state.finalConfig.publicPath}...`,
       );
       cp(
-        path.join(options.directory, state.finalConfig.publicPath),
-        path.join(targetDist),
+        state.finalConfig.publicPath,
+        targetDist,
         { recursive: true },
-      ).catch(err => {
+      ).catch((err) => {
         logger.error("Error copying public files: " + err);
       });
     } else {
@@ -88,9 +95,18 @@ export async function buildSite(
     state.finalConfig.outDir || DIST_DIRNAME,
   );
 
-  const { routeTree, files: _markdowFiles } = (await getMarkdownFiles(
-    options.directory,
-  )) as { routeTree: RouteTree[]; files: string[] };
+  const { routeTree, files } = (await getMarkdownFiles(options.directory)) as {
+    routeTree: RouteTree[];
+    files: string[];
+  };
+
+  //? keep this thing above the parseMD thingy, cuz the parser NEEDS a routeState populated with data well before.
+  routeState.setState({
+    // routes: files.map((item) => {
+    //   return getRouteFromPath(item);
+    // }),
+    files
+  });
 
   const parsePromises: ReturnType<typeof parseMD>[] = [];
   logger.log("Processing routes...");
@@ -106,19 +122,18 @@ export async function buildSite(
 
   logger.log("cleaned routeTree", "debug");
 
-  const {searchIndex: _searchIndex, parsedRoutes} = (await Promise.all(parsePromises)).reduce(
-    (acc, {searchIndex, route}) => {
+  const { searchIndex: _searchIndex, parsedRoutes } = (
+    await Promise.all(parsePromises)
+  ).reduce(
+    (acc, { searchIndex, route }) => {
       acc.searchIndex.push(searchIndex);
       acc.parsedRoutes.push(route);
       return acc;
     },
-    { searchIndex: [] as SearchIndex, parsedRoutes: [] as Route[] }
+    { searchIndex: [] as SearchIndex, parsedRoutes: [] as Route[] },
   );
 
-  const groupedRoutes = Object.groupBy(
-    parsedRoutes,
-    (route) => route.path,
-  );
+  const groupedRoutes = Object.groupBy(parsedRoutes, (route) => route.path);
 
   const routes = makeRoutesOfNestedPaths(routeTree).reduce(
     (acc, pth) => [
@@ -130,7 +145,7 @@ export async function buildSite(
     ],
     [] as Route[],
   );
-  for(let i = 0; i < routes.length; i++) {
+  for (let i = 0; i < routes.length; i++) {
     routes[i].next = routes[i + 1]?.path;
     routes[i].prev = routes[i - 1]?.path;
   }
@@ -165,7 +180,7 @@ export async function buildSite(
   await write(
     path.join(targetDist, "page_data", "meta.json"),
     JSON.stringify(staticMeta),
-    "application/json"
+    "application/json",
   );
 
   //? route registry, maps route path to json file identifier name.
@@ -188,13 +203,17 @@ export async function buildSite(
           `${route.identifier}.json`,
         ),
         JSON.stringify(route),
-        "application/json"
+        "application/json",
       ),
     );
   }
 
   writePromises.push(
-    write(path.join(targetDist, "index.html"), await generateHtml(targetDist), "text/html"),
+    write(
+      path.join(targetDist, "index.html"),
+      await generateHtml(targetDist),
+      "text/html",
+    ),
   );
 
   try {

@@ -48,7 +48,10 @@ export interface UtilState {
 export type SharedState = CommandState & UtilState;
 
 export type RouteState = {
-  routes: string[];
+  /**
+   * markdown files raw absolute urls
+   */
+  files: string[];
 }
 
 export type Writer = (filePath: string, content: string, contentType: string) => Promise<void>;

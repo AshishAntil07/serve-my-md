@@ -1,6 +1,6 @@
-import { appState } from "@/lib/context.js";
-import { getIdentifier, slugifyText } from "@/utils/index.js";
-import type { SearchIndexPage, Route } from "@shared/index.js";
+import { appState, routeState } from "@/lib/context.js";
+import { getIdentifier, slugifyText, traverseRecursive } from "@/utils/index.js";
+import { type SearchIndexPage, type Route, DataAttributes } from "@shared/index.js";
 import type Token from "markdown-it/lib/token.mjs";
 import { getPath, getRouteFromPath } from "./index.js";
 import fs from "fs/promises";
@@ -56,16 +56,23 @@ const processors: Record<
   strong_open: processKeywordOpen,
   em_close: processKeywordClose,
   strong_close: processKeywordClose,
-  image: processImage,
+  image: (() => {
+    const state = appState.getState();
+    const publicAssets: Set<string> = new Set();
+
+    if (state.finalConfig.publicPath) {
+      traverseRecursive(state.finalConfig.publicPath, async (item) => {
+        publicAssets.add(item.slice(state.finalConfig.publicPath!.length));
+      });
+    }
+
+    return (token, _) => processImage(token, publicAssets);
+  })(),
   inline: (token, state) => {
     if (token.children && token.children.length)
       processTokens(token.children, state.searchIndex);
   },
 };
-
-//todo: have multiple processors for each type of tokens, pass in every token, but selectively execute the code
-//todo: inside of the processor, also have the processor state for all of these things, the search index, concern
-//todo: keywordDepth, etc every shit lives in there.
 
 /**
  * @param initialSearchIndex Only used for recursive calls, to pass in the search index that is being built up.
@@ -156,16 +163,18 @@ function processHeadingOpen(token: Token, state: ProcessorState) {
 
 function processLinkOpen(token: Token, _: ProcessorState) {
   const hrefAttr = token.attrGet("href");
+  const rState = routeState.getState();
 
-  //todo: update this link validation(this is left), also the shit that the link actually points to the raw markdown file,
-  //todo: and here it's made to point to the actual route that the markdown file will eventually emit(ts is solved).
-  //todo: Also make sure that there exists a reusable function that works like cleanNestedPaths but for links (ts also solved).
   if (
     hrefAttr &&
     hrefAttr.endsWith(".md") &&
     !hrefAttr.startsWith("http://") &&
     !hrefAttr.startsWith("https://")
   ) {
+    if (!rState.files.includes(hrefAttr)) {
+      token.attrPush([DataAttributes.DATA_INVALID_REFERENCE, hrefAttr]);
+    }
+
     const newHref = getRouteFromPath(hrefAttr);
     token.attrSet("href", newHref);
   }
@@ -197,8 +206,10 @@ function processKeywordClose(_: Token, state: ProcessorState) {
       state.concern === Concern.Keyword ? Concern.None : state.concern;
 }
 
-function processImage(token: Token, _: ProcessorState) {
+function processImage(token: Token, publicAssets: Set<string>) {
   const srcAttr = token.attrGet("src");
 
-  //todo: validate the image link if it belongs to a path in public folder.
+  if (!srcAttr || !publicAssets.has(srcAttr)) {
+    token.attrPush([DataAttributes.DATA_INVALID_SOURCE, srcAttr || "null"])
+  }
 }

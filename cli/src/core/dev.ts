@@ -104,18 +104,17 @@ async function buildVirtualFileRegistry(
   );
 
   if (state.finalConfig.publicPath) {
-    const publicDir = path.join(directory, state.finalConfig.publicPath);
-    if (!existsSync(publicDir)) {
+    if (!existsSync(state.finalConfig.publicPath)) {
       logger.log(
-        `Public directory ${publicDir} does not exist. Skipping public file registration.`,
+        `Public directory ${state.finalConfig.publicPath} does not exist. Skipping public file registration.`,
         "warn",
       );
     } else {
-      logger.log(`Registering public files from ${publicDir}`, "info");
+      logger.log(`Registering public files from ${state.finalConfig.publicPath}`, "info");
     }
 
-    await traverseRecursive(publicDir, async (filePath) => {
-      const relativePath = path.relative(publicDir, filePath);
+    await traverseRecursive(state.finalConfig.publicPath, async (filePath) => {
+      const relativePath = path.relative(state.finalConfig.publicPath!, filePath);
       const virtualPath = path.join("/", relativePath);
 
       const contentType =

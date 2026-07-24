@@ -65,6 +65,13 @@ export async function traverseRecursive(directory: string, callback: (filePath: 
   }
 }
 
+export async function promiseAll<T, U>(arr: Array<T>, callback: (item: T, index?: number) => Promise<U>): Promise<Array<U>> {
+  const promises: Array<Promise<U>> = [], n = arr.length;
+  for (let i = 0; i < n; i++)
+    promises.push(callback(arr[i], i));
+  return Promise.all(promises);
+}
+
 export const getIdentifier = (() => {
   const idGen = identifierGenerator();
   return () => idGen.next().value!;
