@@ -1,12 +1,10 @@
 import { useEffect } from "react"
-import output from '@/.generated/output.json' with { type: 'json' };
-
 
 export default function Fonts() {
   useEffect(() => {
-    document.documentElement.style.setProperty('--font-out-body', output.fonts.body);
-    document.documentElement.style.setProperty('--font-out-mono', output.fonts.mono);
-    document.documentElement.style.setProperty('--font-out-heading', output.fonts.title);
+    // document.documentElement.style.setProperty('--font-out-body', output.fonts.body);
+    // document.documentElement.style.setProperty('--font-out-mono', output.fonts.mono);
+    // document.documentElement.style.setProperty('--font-out-heading', output.fonts.title);
   }, []);
 
   return null;

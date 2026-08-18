@@ -1,8 +1,17 @@
 import { appState, routeState } from "@/lib/context.js";
-import { getIdentifier, slugifyText, traverseRecursive } from "@/utils/index.js";
-import { type SearchIndexPage, type Route, DataAttributes } from "@shared/index.js";
-import type Token from "markdown-it/lib/token.mjs";
-import { getPath, getRouteFromPath } from "./index.js";
+import {
+  cacheBoundary,
+  getIdentifier,
+  slugifyText,
+  traverseRecursive,
+} from "@/utils/index.js";
+import {
+  type SearchIndexPage,
+  type Route,
+  DataAttributes,
+} from "@shared/index.js";
+import Token from "markdown-it/lib/token.mjs";
+import { getPath, getRouteFromPath } from "./scanner.js";
 import fs from "fs/promises";
 
 export async function parseMD(
@@ -14,7 +23,7 @@ export async function parseMD(
 
   const tokens = state.mdParser.parse(await fs.readFile(filepath, "utf-8"), {});
 
-  const { tokens: processedTokens, searchIndex } = processTokens(tokens);
+  const { tokens: processedTokens, searchIndex } = await processTokens(tokens);
 
   const content = state.mdParser.renderer.render(processedTokens, {}, {});
 
@@ -56,34 +65,39 @@ const processors: Record<
   strong_open: processKeywordOpen,
   em_close: processKeywordClose,
   strong_close: processKeywordClose,
-  image: (() => {
-    const state = appState.getState();
-    const publicAssets: Set<string> = new Set();
+  image: cacheBoundary<{ state: Set<string> }, any>(async (state, param) => {
+    if (!state || !state.state) {
+      const astate = appState.getState();
 
-    if (state.finalConfig.publicPath) {
-      traverseRecursive(state.finalConfig.publicPath, async (item) => {
-        publicAssets.add(item.slice(state.finalConfig.publicPath!.length));
-      });
+      const publicAssets: Set<string> = new Set();
+
+      if (astate.finalConfig.publicPath) {
+        await traverseRecursive(astate.finalConfig.publicPath, async (item) => {
+          publicAssets.add(item.slice(astate.finalConfig.publicPath!.length));
+        });
+      }
+
+      state = { state: publicAssets };
     }
 
-    return (token, _) => processImage(token, publicAssets);
-  })(),
-  inline: (token, state) => {
+    return processImage(param, state!.state);
+  }),
+  inline: async (token, state) => {
     if (token.children && token.children.length)
-      processTokens(token.children, state.searchIndex);
+      await processTokens(token.children, state.searchIndex);
   },
 };
 
 /**
  * @param initialSearchIndex Only used for recursive calls, to pass in the search index that is being built up.
  */
-function processTokens(
+async function processTokens(
   tokens: Token[],
   initialSearchIndex?: SearchIndexPage,
-): {
+): Promise<{
   tokens: Token[];
   searchIndex: SearchIndexPage;
-} {
+}> {
   const searchIndex: SearchIndexPage = initialSearchIndex || {
     route: "",
     title: "",
@@ -106,24 +120,28 @@ function processTokens(
     concern: Concern.None,
   };
 
-  function processor(tokens: Token[]) {
+  async function processor(tokens: Token[]) {
     processorState.isKeyword = processorState.concern === Concern.Keyword;
     processorState.isHeading = processorState.concern === Concern.Heading;
 
     processorState.keywordDepth = 0;
 
+    const promises = [];
+    
     for (
       processorState.currentTokenIndex = 0;
       processorState.currentTokenIndex < tokens.length;
       processorState.currentTokenIndex++
     ) {
-      const token = tokens[processorState.currentTokenIndex];
+      const token: Token = tokens[processorState.currentTokenIndex];
 
-      processors[token.type]?.(token, processorState);
+      promises.push(processors[token.type]?.(token, processorState));
     }
+
+    await Promise.all(promises);
   }
 
-  processor(tokens);
+  await processor(tokens);
 
   return { tokens, searchIndex };
 }
@@ -143,21 +161,32 @@ function processText(token: Token, state: ProcessorState) {
   }
 }
 
-function processHeadingOpen(token: Token, state: ProcessorState) {
+async function processHeadingOpen(token: Token, state: ProcessorState) {
   const headingToken = state.tokens[++state.currentTokenIndex!];
 
   if (headingToken && headingToken.type === "inline") {
     const headingText = headingToken.content;
     const slugifiedHeading = slugifyText(headingText);
+
     token.attrSet("id", slugifiedHeading);
 
+    const linkOpen = new Token("link_open", "a", 1);
+    linkOpen.attrSet("href", `#${slugifiedHeading}`);
+    linkOpen.attrSet("class", "heading-anchor");
+
+    const linkClose = new Token("link_close", "a", -1);
+
+    const existingChildren = headingToken.children || [];
+    headingToken.children = [linkOpen, ...existingChildren, linkClose];
+
     state.searchIndex.sections.push({
-      title: "", //? will be populated automatically by following recursive call.
+      title: "", //? Will be populated automatically by following recursive call
       anchor: slugifiedHeading,
       preview: "",
       keywords: [],
     });
-    processTokens(headingToken.children!, state.searchIndex);
+
+    await processTokens(headingToken.children, state.searchIndex);
   }
 }
 
@@ -171,11 +200,13 @@ function processLinkOpen(token: Token, _: ProcessorState) {
     !hrefAttr.startsWith("http://") &&
     !hrefAttr.startsWith("https://")
   ) {
-    if (!rState.files.includes(hrefAttr)) {
-      token.attrPush([DataAttributes.DATA_INVALID_REFERENCE, hrefAttr]);
+    const pathname = hrefAttr.split(/[?#]/)[0];
+    if (!rState.files.includes(pathname)) {
+      token.attrPush([DataAttributes.DATA_INVALID_REFERENCE, pathname]);
     }
 
-    const newHref = getRouteFromPath(hrefAttr);
+    const newHref =
+      getRouteFromPath(pathname) + hrefAttr.slice(pathname.length);
     token.attrSet("href", newHref);
   }
 }
@@ -210,6 +241,6 @@ function processImage(token: Token, publicAssets: Set<string>) {
   const srcAttr = token.attrGet("src");
 
   if (!srcAttr || !publicAssets.has(srcAttr)) {
-    token.attrPush([DataAttributes.DATA_INVALID_SOURCE, srcAttr || "null"])
+    token.attrPush([DataAttributes.DATA_INVALID_SOURCE, srcAttr || "null"]);
   }
 }

@@ -159,6 +159,11 @@ export function makeRoutesOfNestedPathsRaw(
   }, [] as string[]);
 }
 
+export function cacheBoundary<T, U>(callback: (state: T | null, param: U) => void) {
+  let state: T | null = null;
+  return (param: U) => callback(state, param);
+}
+
 export function ogToHtml(og: OpenGraph): string {
   const tags: string[] = [];
 

@@ -8,7 +8,6 @@ import IntentLink from './IntentLink';
 import { Kbd } from './ui/kbd';
 import { SidebarTrigger } from './ui/sidebar';
 import { useIsMobile } from '@/hooks/useMobile';
-import { markElements, slugify } from '@/lib/utils';
 import Search from './Search';
 import ThemeSwitch from './ThemeSwitcher';
 import { useBaseStore } from '@/store/base.store';
@@ -27,7 +26,7 @@ export default function Handler() {
     />
   ) : (
     <>
-      <Skeleton className="h-10 w-1/3 mb-4" />
+      <Skeleton className="h-13 w-1/3 mb-4 mt-10" />
       <Skeleton className="h-4 w-full mb-2" />
       <Skeleton className="h-4 w-full mb-2" />
       <Skeleton className="h-4 w-4/7 mb-2" />
@@ -37,9 +36,9 @@ export default function Handler() {
       <Skeleton className="h-4 w-full mb-2" />
       <Skeleton className="h-4 w-4/7 mb-2" />
 
-      <div className="flex justify-between mt-10 w-full">
-        <Skeleton className="h-10 w-1/3" />
-        <Skeleton className="h-10 w-1/3" />
+      <div className="flex justify-between mt-12 w-full">
+        <Skeleton className="h-20 w-1/3" />
+        <Skeleton className="h-20 w-1/3" />
       </div>
     </>
   );
@@ -91,7 +90,6 @@ export function Rendrer({
       if (
         elem.getAttribute('href')?.startsWith('http://') ||
         elem.getAttribute('href')?.startsWith('https://')
-        // !out.routes.find((r) => r.path === elem.getAttribute('href'))
       )
         return;
 
@@ -100,20 +98,6 @@ export function Rendrer({
         navigate({ to: elem.getAttribute('href') || '/' });
       });
     });
-
-    markElements(article);
-    article.querySelectorAll('h1,h2,h3,h4').forEach((element) => {
-      element.id = slugify(element.textContent);
-
-      const a = document.createElement('a');
-      a.href = `#${element.id}`;
-      a.classList.add('heading-anchor');
-      a.innerHTML = element.innerHTML;
-      element.innerHTML = '';
-      element.appendChild(a);
-    });
-
-    // Prism.highlightAllUnder(article, true);
   }, [articleRef.current]);
 
   return (

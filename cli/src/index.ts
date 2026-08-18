@@ -8,13 +8,13 @@ import commands from "./lib/commands.js";
 import { logger } from "./lib/index.js";
 import MarkdownIt from "markdown-it";
 import Prism from "prismjs";
-import { parseSmmIgnore, readConfig } from "./core/index.js";
 import defaultSmmConfig from "@/smm.config.json" with { type: "json" };
 import type { CommandState, SmmConfig } from "./types/index.js";
 import MarkdownItFootNote from "markdown-it-footnote";
 import MarkdownItTasks from "markdown-it-task-lists";
 import loadLanguages from "prismjs/components/index.js";
 import { appState } from "./lib/context.js";
+import { parseSmmIgnore, readConfig } from "./core/config.js";
 
 const partialState = await new Promise<CommandState>(async (resolve) => {
   const program = new Command();
@@ -25,7 +25,7 @@ const partialState = await new Promise<CommandState>(async (resolve) => {
     .version(config.version);
 
   const buildCommand = program.command("build");
-
+  
   buildCommand
     .option(
       "-d, --directory <path>",

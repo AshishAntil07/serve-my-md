@@ -3,7 +3,9 @@ import type { Route } from '@shared/index';
 import path from 'path-browserify';
 
 export default class Api {
-  private static pageDataUrl = new URL('../page_data', import.meta.url);
+  private static pageDataUrl = import.meta.env.PROD
+    ? new URL('../page_data', import.meta.url).toString()
+    : '/page_data';
   private static lockedApis: Set<string> = new Set();
 
   static async fetchRoute(routeIdentifier: string): Promise<Route | null> {
@@ -34,7 +36,16 @@ export default class Api {
     return this.retryWrapper<AppData['registry']>(
       path.join(this.pageDataUrl.toString(), 'registry.json'),
       async (res, resolve, reject) => {
-        if (res.ok) return resolve(res.json());
+        if (res.ok)
+          return resolve(
+            (await res.json()).reduce(
+              (
+                acc: Record<string, string>,
+                item: { path: string; identifier: string }
+              ) => ({ ...acc, [item.path]: item.identifier }),
+              {} as Record<string, string>
+            )
+          );
         reject(new Error('Failed to fetch registry'));
       }
     );

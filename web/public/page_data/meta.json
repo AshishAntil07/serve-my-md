@@ -1,0 +1,1 @@
+{"rootTitle":"SMM Costly Fixture","description":"A fixture for testing costly operations in SMM.","baseRoute":"/costly","defaultTheme":"light","name":"Costly Store","showNameWithLogo":true,"fonts":{"title":"Consolas","body":"Montserrat","mono":"monospace"}}

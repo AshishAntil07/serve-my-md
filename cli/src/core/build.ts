@@ -11,20 +11,14 @@ import {
   makeRoutesOfNestedPaths,
   makeRoutesOfNestedPathsRaw,
   optional,
-  promiseAll,
 } from "@/utils/index.js";
 import { cp, mkdir, rm, writeFile } from "fs/promises";
 import path from "path";
-import {
-  getMarkdownFiles,
-  cleanNestedPaths,
-  generateHtml,
-  buildDistRoutesFromRouteTree,
-  getRouteFromPath,
-} from "./index.js";
 import { parseMD } from "./processor.js";
 import { appState, routeState } from "@/lib/context.js";
 import { DIST_DIRNAME, distDir } from "@/constants.js";
+import { cleanNestedPaths, getMarkdownFiles } from "./scanner.js";
+import { buildDistRoutesFromRouteTree, generateHtml } from "./template.js";
 
 export default async function build(): Promise<boolean> {
   const state = appState.getState();
@@ -47,21 +41,15 @@ export default async function build(): Promise<boolean> {
     });
 
   if (state.finalConfig.publicPath) {
-    if (
-      await FileOrDirectoryExists(
-        state.finalConfig.publicPath,
-      )
-    ) {
+    if (await FileOrDirectoryExists(state.finalConfig.publicPath)) {
       logger.log(
         `Copying public assets from ${state.finalConfig.publicPath}...`,
       );
-      cp(
-        state.finalConfig.publicPath,
-        targetDist,
-        { recursive: true },
-      ).catch((err) => {
-        logger.error("Error copying public files: " + err);
-      });
+      cp(state.finalConfig.publicPath, targetDist, { recursive: true }).catch(
+        (err) => {
+          logger.error("Error copying public files: " + err);
+        },
+      );
     } else {
       logger.error(
         `Public path "${state.finalConfig.publicPath}" does not exist!`,
@@ -102,10 +90,7 @@ export async function buildSite(
 
   //? keep this thing above the parseMD thingy, cuz the parser NEEDS a routeState populated with data well before.
   routeState.setState({
-    // routes: files.map((item) => {
-    //   return getRouteFromPath(item);
-    // }),
-    files
+    files,
   });
 
   const parsePromises: ReturnType<typeof parseMD>[] = [];
@@ -122,7 +107,7 @@ export async function buildSite(
 
   logger.log("cleaned routeTree", "debug");
 
-  const { searchIndex: _searchIndex, parsedRoutes } = (
+  const { searchIndex, parsedRoutes } = (
     await Promise.all(parsePromises)
   ).reduce(
     (acc, { searchIndex, route }) => {
@@ -189,6 +174,12 @@ export async function buildSite(
     JSON.stringify(
       routes.map((r) => ({ path: r.path, identifier: r.identifier })),
     ),
+    "application/json",
+  );
+
+  await write(
+    path.join(targetDist, "page_data", "search_index.json"),
+    JSON.stringify(searchIndex),
     "application/json",
   );
 

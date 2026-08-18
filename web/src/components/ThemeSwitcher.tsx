@@ -3,7 +3,6 @@ import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import output from "@/.generated/output.json" with { type: "json" };
 
 export default function ThemeSwitch({ className }: { className?: string }) {
   const switchTheme = () => {
@@ -19,7 +18,6 @@ export default function ThemeSwitch({ className }: { className?: string }) {
   useEffect(() => {
     const initTheme =
       localStorage.getItem("theme") ||
-      output.defaultTheme || 
       (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 
     if (initTheme === "dark") {

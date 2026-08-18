@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { ChevronsUpDown } from 'lucide-react';
 import type { JSX } from 'react';
 
@@ -72,32 +72,32 @@ function SidebarComponent({
     ): Array<JSX.Element | null> => {
       return !loading
         ? pairs!.map(({ label, children, isGrouper, pathSegment }, i) => {
-            if (prefix !== '/' && !label) return null;
+          if (prefix !== '/' && !label) return null;
 
-            return children ? (
-              isGrouper ? (
-                <SidebarGrouper key={i} label={label}>
-                  {buildLinks(children, prefix)}
-                </SidebarGrouper>
-              ) : (
-                <SidebarCollapsible
-                  key={i}
-                  label={label}
-                  href={prefix + '/' + pathSegment}
-                >
-                  {buildLinks(children, prefix + '/' + pathSegment)}
-                </SidebarCollapsible>
-              )
+          return children ? (
+            isGrouper ? (
+              <SidebarGrouper key={i} label={label}>
+                {buildLinks(children, prefix)}
+              </SidebarGrouper>
             ) : (
-              <SidebarLink
+              <SidebarCollapsible
                 key={i}
-                href={prefix + '/' + pathSegment}
                 label={label}
-              />
-            );
-          })
+                href={prefix + '/' + pathSegment}
+              >
+                {buildLinks(children, prefix + '/' + pathSegment)}
+              </SidebarCollapsible>
+            )
+          ) : (
+            <SidebarLink
+              key={i}
+              href={prefix + '/' + pathSegment}
+              label={label}
+            />
+          );
+        })
         : [
-            <>
+          <React.Fragment key={"skeletons"}>
               <Skeleton className="h-4 w-3/4 mb-2" />
               <Skeleton className="h-4 w-1/2 mb-2" />
               <Skeleton className="h-4 w-1/4 mb-2" />
@@ -107,7 +107,7 @@ function SidebarComponent({
               <Skeleton className="h-2.5 w-5/7 mb-2" />
               <Skeleton className="h-4 w-5/8 mb-2" />
               <Skeleton className="h-4 w-9/10 mb-2" />
-            </>
+            </React.Fragment>
           ];
     };
     return buildLinks(paths, baseRoute || '/');

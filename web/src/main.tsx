@@ -18,7 +18,7 @@ import { pathsContext, routesCacheContext } from '@/contexts';
 import Fonts from '@/components/Fonts';
 import constants from '@shared/constants.json' with { type: 'json' };
 import RoutesCache from './lib/routesCache';
-import usePopulator from './hooks/useRoutes';
+import usePopulator from './hooks/usePopulator';
 
 const STATIC_TEMP_CONTENT_PREFIX = constants.STATIC_TEMP_CONTENT_PREFIX;
 

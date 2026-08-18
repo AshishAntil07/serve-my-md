@@ -15,7 +15,6 @@ export function extractText(
   template.innerHTML = html;
 
   const flattened = flatDom([template]);
-  markElementsFromExtraction(flattened);
 
   return flattened.map((el) => ({ targetElement: el, text: el.textContent }));
 }
@@ -48,22 +47,20 @@ export function slugify(text: string): string {
     .replace(/\-\-+/g, '-');
 }
 
-const headings = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
+// export function markElements(root: HTMLElement) {
+//   markElementsFromExtraction(flatDom([root]));
+// }
 
-export function markElements(root: HTMLElement) {
-  markElementsFromExtraction(flatDom([root]));
-}
-
-export function markElementsFromExtraction(
-  extraction: ReturnType<typeof extractText> | ReturnType<typeof flatDom>
-) {
-  extraction.forEach((el, index) => {
-    const element = 'targetElement' in el ? el.targetElement : el;
-    if (element.textContent) {
-      element.setAttribute('data-label', index.toString());
-    }
-  });
-}
+// export function markElementsFromExtraction(
+//   extraction: ReturnType<typeof extractText> | ReturnType<typeof flatDom>
+// ) {
+//   extraction.forEach((el, index) => {
+//     const element = 'targetElement' in el ? el.targetElement : el;
+//     if (element.textContent) {
+//       element.setAttribute('data-label', index.toString());
+//     }
+//   });
+// }
 
 export function highlightSubstring(
   text: string,

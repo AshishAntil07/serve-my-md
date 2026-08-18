@@ -4,11 +4,9 @@ import { devtools } from '@tanstack/devtools-vite';
 import viteReact from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import tsconfigPaths from "vite-tsconfig-paths";
-import out from './src/.generated/output.json' with { type: 'json' };
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: out.baseRoute,
   plugins: [
     devtools(),
     viteReact({
@@ -21,7 +19,7 @@ export default defineConfig({
   ],
   root: fileURLToPath(new URL('.', import.meta.url)),
   build: {
-    outDir: out.outDir || "dist"
+    outDir: "dist"
   },
   resolve: {
     alias: {

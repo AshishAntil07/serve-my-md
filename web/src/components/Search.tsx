@@ -52,45 +52,45 @@ export default function Search() {
       return;
     }
 
-    setResults(
-      output.routes.reduce(
-        (acc, route) => {
-          const extraction = extractText(route.content);
+    // setResults(
+    //   output.routes.reduce(
+    //     (acc, route) => {
+    //       const extraction = extractText(route.content);
 
-          if (route.path === pathname) {
-            extraction.forEach(({ targetElement, text }) => {
-              if (text.toLowerCase().includes(val.toLowerCase())) {
-                acc.internal.push({
-                  text,
-                  targetElement
-                });
-              }
-            });
+    //       if (route.path === pathname) {
+    //         extraction.forEach(({ targetElement, text }) => {
+    //           if (text.toLowerCase().includes(val.toLowerCase())) {
+    //             acc.internal.push({
+    //               text,
+    //               targetElement
+    //             });
+    //           }
+    //         });
 
-            return acc;
-          }
+    //         return acc;
+    //       }
 
-          extraction.every(({ targetElement, text }) => {
-            if (text.toLowerCase().includes(val.toLowerCase())) {
-              acc.external.push({
-                path: route.path,
-                matches: (text.match(new RegExp(val, 'gi')) || []).length,
-                text,
-                targetElement,
-                title: getTitleFromExtraction(extraction)
-              });
+    //       extraction.every(({ targetElement, text }) => {
+    //         if (text.toLowerCase().includes(val.toLowerCase())) {
+    //           acc.external.push({
+    //             path: route.path,
+    //             matches: (text.match(new RegExp(val, 'gi')) || []).length,
+    //             text,
+    //             targetElement,
+    //             title: getTitleFromExtraction(extraction)
+    //           });
 
-              return false;
-            }
+    //           return false;
+    //         }
 
-            return true;
-          });
+    //         return true;
+    //       });
 
-          return acc;
-        },
-        { internal: [], external: [] } as typeof results
-      )
-    );
+    //       return acc;
+    //     },
+    //     { internal: [], external: [] } as typeof results
+    //   )
+    // );
   };
 
   useEffect(() => {

@@ -44,4 +44,9 @@ export default function usePopulator() {
       });
     }
   }, [pathname, routesCache, store]);
+
+  useEffect(() => {
+    if (routesCache.has(pathname))
+      store.setCurrentRoute(routesCache.get(pathname)!);
+  }, [routesCache, pathname, store.setCurrentRoute]);
 }
