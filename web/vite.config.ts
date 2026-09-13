@@ -19,7 +19,8 @@ export default defineConfig({
   ],
   root: fileURLToPath(new URL('.', import.meta.url)),
   build: {
-    outDir: "dist"
+    outDir: "dist",
+    sourcemap: true
   },
   resolve: {
     alias: {

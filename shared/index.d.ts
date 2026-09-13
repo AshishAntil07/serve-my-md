@@ -41,13 +41,3 @@ export type RouteTree = {
   pathSegment: string;
   isGrouper?: boolean;
 };
-
-/**
- * A unique prefix for static content in the HTML template, used to replace temp content with react components.
- */
-export const STATIC_TEMP_CONTENT_PREFIX = "__smm_static_temp_content__";
-
-export enum DataAttributes {
-  DATA_INVALID_SOURCE = "data-invalid-source",
-  DATA_INVALID_REFERENCE = "data-invalid-reference"
-}

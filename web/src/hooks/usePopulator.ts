@@ -1,5 +1,6 @@
 import { routesCacheContext } from '@/contexts';
 import Api from '@/lib/api';
+import { getIdentifier } from '@/lib/utils';
 import { useBaseStore } from '@/store/base.store';
 import { useLocation } from '@tanstack/react-router';
 import { useContext, useEffect } from 'react';
@@ -16,32 +17,37 @@ export default function usePopulator() {
   useEffect(() => {
     if (!store.meta)
       Api.fetchMeta().then((meta) => {
-        if(!meta) return;
+        if (!meta) return;
 
         store.setMeta(meta);
       });
 
     if (!store.registry)
       Api.fetchRegistry().then((registry) => {
-        if(!registry) return;
+        if (!registry) return;
 
         store.setRegistry(registry);
       });
 
     if (!store.routeTree)
       Api.fetchRouteTree().then((routeTree) => {
-        if(!routeTree) return;
+        if (!routeTree) return;
 
         store.setRouteTree(routeTree);
       });
 
     if (!routesCache.has(pathname) && store.registry) {
-      Api.fetchRoute(store.registry[pathname]).then((route) => {
-        if(!route) return;
+      const identifier = getIdentifier(store.registry, pathname);
+      if (identifier) {
+        Api.fetchRoute(identifier).then((route) => {
+          if (!route) return;
 
-        routesCache.set(pathname, route);
-        store.setCurrentRoute(route);
-      });
+          routesCache.set(pathname, route);
+          store.setCurrentRoute(route);
+        });
+      } else {
+        if (!store.is404) store.set404();
+      }
     }
   }, [pathname, routesCache, store]);
 

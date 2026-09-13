@@ -2,4 +2,4 @@
 
 The Exotic Electronics, delivering everywhere - from Nigeria to Nihon.
 
-- [Goalie Laptops](/electronic-items/laptop)
+- [Goalie Laptops](/costly/Electronic%20Items/Laptop.md)

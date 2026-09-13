@@ -12,6 +12,7 @@ import Search from './Search';
 import ThemeSwitch from './ThemeSwitcher';
 import { useBaseStore } from '@/store/base.store';
 import { Skeleton } from './ui/skeleton';
+import { HomeIcon } from 'lucide-react';
 
 export default function Handler() {
   const baseStore = useBaseStore();
@@ -22,7 +23,8 @@ export default function Handler() {
       content={baseStore.currentRoute?.content || ''}
       next={baseStore.currentRoute?.next}
       prev={baseStore.currentRoute?.prev}
-      title={''}
+      is404={baseStore.is404}
+      baseRoute={baseStore.meta?.baseRoute}
     />
   ) : (
     <>
@@ -49,13 +51,15 @@ export function Rendrer({
   content,
   next,
   prev,
-  title
+  is404,
+  baseRoute
 }: {
   path: string;
   content: string;
   next?: string;
   prev?: string;
-  title: string;
+  is404?: boolean;
+  baseRoute?: string;
 }) {
   const articleRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -98,7 +102,7 @@ export function Rendrer({
         navigate({ to: elem.getAttribute('href') || '/' });
       });
     });
-  }, [articleRef.current]);
+  }, [articleRef.current, content]);
 
   return (
     <>
@@ -106,7 +110,7 @@ export function Rendrer({
         <div className="flex items-center gap-2 justify-between">
           <div className="flex items-center gap-2 justify-start">
             {isMobile && <SidebarTrigger variant="outline" />}
-            <Bettercrumb path={path} />
+            {is404 ? null : <Bettercrumb path={path} />}
           </div>
           <div className="flex items-center gap-2 justify-end">
             <ThemeSwitch />
@@ -114,38 +118,47 @@ export function Rendrer({
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold mt-4">{title}</h1>
-
-        <article
-          ref={articleRef}
-          className="main-article w-full mt-4"
-          dangerouslySetInnerHTML={{ __html: content }}
-        />
-
-        <div className="flex justify-between mt-10 w-full">
-          {prev ? (
-            <>
-              <Button variant="outline" asChild ref={prevRef}>
-                <IntentLink to={prev}>
-                  Previous <Kbd>Alt + Shift + ⏎</Kbd>
-                </IntentLink>
-              </Button>
-            </>
-          ) : (
-            <span></span>
-          )}
-          {next ? (
-            <>
-              <Button variant="outline" asChild ref={nextRef}>
-                <IntentLink to={next}>
-                  Next <Kbd>Alt + ⏎</Kbd>
-                </IntentLink>
-              </Button>
-            </>
-          ) : (
-            <span></span>
-          )}
-        </div>
+        {is404 ? (
+          <div className="flex flex-col gap-4 items-center justify-center h-[80vh] mt-8">
+            <h1 className="text-7xl font-bold tracking-wider">404</h1>
+            <p>Oops! You landed on a page that doesn't exist.</p>
+            <Button variant="default" className="mt-8" asChild>
+              <IntentLink to={baseRoute || "/"}><HomeIcon /> Back to Home</IntentLink>
+            </Button>
+          </div>
+        ) : (
+          <>
+            <article
+              ref={articleRef}
+              className="main-article w-full mt-8"
+              dangerouslySetInnerHTML={{ __html: content }}
+            />
+            <div className="flex justify-between mt-10 w-full">
+              {prev ? (
+                <>
+                  <Button variant="outline" asChild ref={prevRef}>
+                    <IntentLink to={prev}>
+                      Previous <Kbd>Alt + Shift + ⏎</Kbd>
+                    </IntentLink>
+                  </Button>
+                </>
+              ) : (
+                <span></span>
+              )}
+              {next ? (
+                <>
+                  <Button variant="outline" asChild ref={nextRef}>
+                    <IntentLink to={next}>
+                      Next <Kbd>Alt + ⏎</Kbd>
+                    </IntentLink>
+                  </Button>
+                </>
+              ) : (
+                <span></span>
+              )}
+            </div>
+          </>
+        )}
       </main>
     </>
   );

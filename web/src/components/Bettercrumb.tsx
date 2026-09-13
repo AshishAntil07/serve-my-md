@@ -15,18 +15,24 @@ import {
   DropdownMenuTrigger
 } from './ui/dropdown-menu';
 import IntentLink from './IntentLink';
+import { useBaseStore } from '@/store/base.store';
+import pathBrowserify from 'path-browserify';
 
 const MAX_CRUMBS = 3;
 
 export default function Bettercrumb({ path }: { path: string }) {
-  const pathPieces = path.split('/').filter(Boolean);
+  const baseRoute = useBaseStore((state) => state.meta?.baseRoute);
+  const pathPieces = path
+    .slice((baseRoute || '').length)
+    .split('/')
+    .filter(Boolean);
 
   return (
     <>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink to={'/'} className="px-2 py-1.5">
+            <BreadcrumbLink to={baseRoute || '/'} className="px-2 py-1.5">
               <HomeIcon className="w-4" />
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -45,7 +51,10 @@ export default function Bettercrumb({ path }: { path: string }) {
                       .map((piece, index) => (
                         <DropdownMenuItem key={index} asChild>
                           <IntentLink
-                            to={'/' + pathPieces.slice(0, index + 1).join('/')}
+                            to={pathBrowserify.join(
+                              baseRoute || '/',
+                              pathPieces.slice(0, index + 1).join('/')
+                            )}
                             className="px-2 py-1.5"
                           >
                             {piece}
@@ -65,12 +74,12 @@ export default function Bettercrumb({ path }: { path: string }) {
               <React.Fragment key={index}>
                 <BreadcrumbItem>
                   <BreadcrumbLink
-                    to={
-                      '/' +
+                    to={pathBrowserify.join(
+                      baseRoute || '/',
                       pathPieces
                         .slice(0, pathPieces.length - arr.length + index + 1)
                         .join('/')
-                    }
+                    )}
                     className="px-2 py-1.5"
                   >
                     {piece}

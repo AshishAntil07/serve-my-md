@@ -5,14 +5,17 @@ import {
   slugifyText,
   traverseRecursive,
 } from "@/utils/index.js";
-import {
-  type SearchIndexPage,
-  type Route,
-  DataAttributes,
+import type {
+  SearchIndexPage,
+  Route,
 } from "@shared/index.js";
+import constants from "@shared/constants.json" with {type: "json"};
 import Token from "markdown-it/lib/token.mjs";
 import { getPath, getRouteFromPath } from "./scanner.js";
 import fs from "fs/promises";
+import path from "path";
+
+const DataAttributes = constants.DataAttributes;
 
 export async function parseMD(
   filepath: string,
@@ -59,29 +62,34 @@ const processors: Record<
 > = {
   text: processText,
   heading_open: processHeadingOpen,
+  heading_close: processHeadingClose,
   link_open: processLinkOpen,
   code_inline: processCodeInline,
   em_open: processKeywordOpen,
   strong_open: processKeywordOpen,
   em_close: processKeywordClose,
   strong_close: processKeywordClose,
-  image: cacheBoundary<{ state: Set<string> }, any>(async (state, param) => {
-    if (!state || !state.state) {
-      const astate = appState.getState();
-
+  async image(token, _) {
+    const astate = appState.getState();
+    const getPublicAssets = cacheBoundary<
+      Promise<Set<string>>,
+      string | undefined
+    >(async (publicPath) => {
       const publicAssets: Set<string> = new Set();
+      if (!publicPath) return publicAssets;
 
-      if (astate.finalConfig.publicPath) {
-        await traverseRecursive(astate.finalConfig.publicPath, async (item) => {
-          publicAssets.add(item.slice(astate.finalConfig.publicPath!.length));
-        });
-      }
+      await traverseRecursive(publicPath, async (item) => {
+        publicAssets.add(item.slice(publicPath!.length));
+      });
 
-      state = { state: publicAssets };
-    }
+      return publicAssets;
+    });
 
-    return processImage(param, state!.state);
-  }),
+    return processImage(
+      token,
+      await getPublicAssets(astate.finalConfig.publicPath),
+    );
+  },
   inline: async (token, state) => {
     if (token.children && token.children.length)
       await processTokens(token.children, state.searchIndex);
@@ -127,7 +135,7 @@ async function processTokens(
     processorState.keywordDepth = 0;
 
     const promises = [];
-    
+
     for (
       processorState.currentTokenIndex = 0;
       processorState.currentTokenIndex < tokens.length;
@@ -162,8 +170,9 @@ function processText(token: Token, state: ProcessorState) {
 }
 
 async function processHeadingOpen(token: Token, state: ProcessorState) {
-  const headingToken = state.tokens[++state.currentTokenIndex!];
+  const headingToken = state.tokens[state.currentTokenIndex! + 1];
 
+  state.concern = Concern.Heading;
   if (headingToken && headingToken.type === "inline") {
     const headingText = headingToken.content;
     const slugifiedHeading = slugifyText(headingText);
@@ -179,17 +188,23 @@ async function processHeadingOpen(token: Token, state: ProcessorState) {
     const existingChildren = headingToken.children || [];
     headingToken.children = [linkOpen, ...existingChildren, linkClose];
 
+
     state.searchIndex.sections.push({
       title: "", //? Will be populated automatically by following recursive call
       anchor: slugifiedHeading,
       preview: "",
       keywords: [],
     });
-
-    await processTokens(headingToken.children, state.searchIndex);
   }
 }
 
+function processHeadingClose(_: Token, state: ProcessorState) {
+  state.concern = Concern.None;
+}
+
+
+//TODO: resolve href with current path(the directory the md file is in) and then check if it exists in the rState.files.
+//TODO: also note that rState.files are absolute paths from root, and not relative from options.directory.
 function processLinkOpen(token: Token, _: ProcessorState) {
   const hrefAttr = token.attrGet("href");
   const rState = routeState.getState();
@@ -201,8 +216,11 @@ function processLinkOpen(token: Token, _: ProcessorState) {
     !hrefAttr.startsWith("https://")
   ) {
     const pathname = hrefAttr.split(/[?#]/)[0];
-    if (!rState.files.includes(pathname)) {
+    const toSearch = pathname.replaceAll("%20", " ");
+    if (!rState.files.includes(toSearch)) {
       token.attrPush([DataAttributes.DATA_INVALID_REFERENCE, pathname]);
+      console.log(toSearch);
+      console.log(rState.files);
     }
 
     const newHref =

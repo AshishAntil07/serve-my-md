@@ -1,8 +1,8 @@
 import { appState } from "@/lib/context.js";
 import fs from "fs/promises";
-import path from 'path';
+import path from "path";
 import type { RouteTree, Route } from "@shared/index.js";
-import constants from "@shared/constants.json" with {type: "json"};
+import constants from "@shared/constants.json" with { type: "json" };
 import type { Writer } from "@/types/index.js";
 import { ogToHtml } from "@/utils/index.js";
 import { logger } from "@/lib/index.js";
@@ -36,7 +36,7 @@ export async function generateHtml(
       const cssFile = files.find((file) => file.endsWith(".css"));
       const jsFile = files.find((file) => file.endsWith(".js"));
       const prefix = distDir.slice(
-        path.join(import.meta.dirname, state.options.directory).length,
+        path.join(state.options.directory, "dist").length,
       );
       htmlTemplate = htmlTemplate.replace(
         `<script type="module" src="/src/main.tsx"></script>`,
@@ -96,33 +96,44 @@ export async function generateHtml(
   }
 }
 
-export async function buildDistRoutesFromRouteTree(
-  routeTree: RouteTree[],
-  groupedRoutes: Partial<Record<string, Route[]>>,
-  distPath: string,
-  write: Writer,
-  prefix: string = "/",
-): Promise<void> {
+export interface BuildDistRoutesFromRouteTreeOptions {
+  routeTree: RouteTree[];
+  groupedRoutes: Partial<Record<string, Route[]>>;
+  distPath: string;
+  baseRoute: string;
+  write: Writer;
+  prefix?: string;
+}
+export async function buildDistRoutesFromRouteTree({
+  routeTree,
+  groupedRoutes,
+  distPath,
+  baseRoute,
+  write,
+  prefix = "/",
+}: BuildDistRoutesFromRouteTreeOptions): Promise<void> {
   for (const node of routeTree) {
     if (node.children) {
-      await buildDistRoutesFromRouteTree(
-        node.children,
+      await buildDistRoutesFromRouteTree({
+        routeTree: node.children,
         groupedRoutes,
         distPath,
         write,
-        path.join(prefix, node.isGrouper ? "" : node.pathSegment),
-      );
+        prefix: path.join(prefix, node.isGrouper ? "" : node.pathSegment),
+        baseRoute,
+      });
     } else {
       const distRoutePath =
         path.join(
           distPath,
+          baseRoute,
           prefix,
           node.pathSegment.replace("/", ""),
           node.pathSegment ? "" : "/index.html",
         ) + (node.pathSegment === "" ? "" : ".html");
 
       const html = await generateHtml(
-        distPath,
+        path.join(distPath, baseRoute),
         groupedRoutes[path.posix.join(prefix, node.pathSegment)]?.[0]?.content,
       );
       await write(distRoutePath, html, "text/html");

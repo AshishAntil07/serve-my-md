@@ -22,6 +22,7 @@ class State<T> {
   
   setState(newState: T) {
     this.context.state = { ...(this.context.state || {}), ...newState };
+    Object.freeze(this.context.state);
   }
 }
 

@@ -83,7 +83,8 @@ export function getRouteFromPath(sourcePath: string): string {
   });
 
   cleanNestedPaths(routeTree.children!);
-  return makeRoutesOfNestedPaths(routeTree.children!)[0];
+  
+  return makeRoutesOfNestedPaths(routeTree.children!).at(-1)!;
 }
 
 export function cleanNestedPaths(routeTree: RouteTree[]): void {

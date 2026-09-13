@@ -2,16 +2,17 @@ import type { AppData } from '@/types';
 import type { Route } from '@shared/index';
 import path from 'path-browserify';
 
+
 export default class Api {
   private static pageDataUrl = import.meta.env.PROD
-    ? new URL('../page_data', import.meta.url).toString()
+    ? new URL('../page_data', import.meta.url).pathname
     : '/page_data';
   private static lockedApis: Set<string> = new Set();
 
   static async fetchRoute(routeIdentifier: string): Promise<Route | null> {
     return this.retryWrapper<Route>(
       path.join(
-        this.pageDataUrl.toString(),
+        this.pageDataUrl,
         'routes',
         routeIdentifier + '.json'
       ),
@@ -24,7 +25,7 @@ export default class Api {
 
   static async fetchMeta(): Promise<AppData['meta'] | null> {
     return this.retryWrapper<AppData['meta']>(
-      path.join(this.pageDataUrl.toString(), 'meta.json'),
+      path.join(this.pageDataUrl, 'meta.json'),
       async (res, resolve, reject) => {
         if (res.ok) return resolve(res.json());
         reject(new Error('Failed to fetch meta'));
@@ -34,7 +35,7 @@ export default class Api {
 
   static async fetchRegistry(): Promise<AppData['registry'] | null> {
     return this.retryWrapper<AppData['registry']>(
-      path.join(this.pageDataUrl.toString(), 'registry.json'),
+      path.join(this.pageDataUrl, 'registry.json'),
       async (res, resolve, reject) => {
         if (res.ok)
           return resolve(
@@ -53,7 +54,7 @@ export default class Api {
 
   static async fetchRouteTree(): Promise<AppData['routeTree'] | null> {
     return this.retryWrapper<AppData['routeTree']>(
-      path.join(this.pageDataUrl.toString(), 'paths.json'),
+      path.join(this.pageDataUrl, 'paths.json'),
       async (res, resolve, reject) => {
         if (res.ok) return resolve(res.json());
         reject(new Error('Failed to fetch route tree'));

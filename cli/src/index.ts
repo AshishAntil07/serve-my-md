@@ -113,8 +113,8 @@ const md = new MarkdownIt({
 md.linkify.set({ fuzzyEmail: false });
 
 if (finalConfig.publicPath)
-  finalConfig.publicPath = path.resolve(partialState.options.directory, finalConfig.publicPath);
-
+  finalConfig.publicPath = path.join(partialState.options.directory, finalConfig.publicPath);
+  
 const state: SharedState = {
   ...partialState,
   finalConfig,

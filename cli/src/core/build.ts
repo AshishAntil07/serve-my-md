@@ -31,7 +31,11 @@ export default async function build(): Promise<boolean> {
 
   await rm(targetDist, { recursive: true }).catch(() => {});
 
-  const isCopied = await cp(distDir, targetDist, { recursive: true })
+  const isCopied = await cp(
+    distDir,
+    path.join(targetDist, state.finalConfig.baseRoute || ""),
+    { recursive: true },
+  )
     .then(() => {
       return true;
     })
@@ -45,11 +49,13 @@ export default async function build(): Promise<boolean> {
       logger.log(
         `Copying public assets from ${state.finalConfig.publicPath}...`,
       );
-      cp(state.finalConfig.publicPath, targetDist, { recursive: true }).catch(
-        (err) => {
-          logger.error("Error copying public files: " + err);
-        },
-      );
+      cp(
+        state.finalConfig.publicPath,
+        path.join(targetDist, state.finalConfig.baseRoute || ""),
+        { recursive: true },
+      ).catch((err) => {
+        logger.error("Error copying public files: " + err);
+      });
     } else {
       logger.error(
         `Public path "${state.finalConfig.publicPath}" does not exist!`,
@@ -83,6 +89,11 @@ export async function buildSite(
     state.finalConfig.outDir || DIST_DIRNAME,
   );
 
+  const baseWritePath = path.join(
+    targetDist,
+    state.finalConfig.baseRoute || "/",
+  );
+
   const { routeTree, files } = (await getMarkdownFiles(options.directory)) as {
     routeTree: RouteTree[];
     files: string[];
@@ -90,7 +101,7 @@ export async function buildSite(
 
   //? keep this thing above the parseMD thingy, cuz the parser NEEDS a routeState populated with data well before.
   routeState.setState({
-    files,
+    files: files.map(file => path.join(state.finalConfig.baseRoute||'', file.slice(options.directory.length))),
   });
 
   const parsePromises: ReturnType<typeof parseMD>[] = [];
@@ -158,19 +169,19 @@ export async function buildSite(
   });
 
   await write(
-    path.join(targetDist, "page_data", "paths.json"),
+    path.join(baseWritePath, "page_data", "paths.json"),
     JSON.stringify(routeTree),
     "application/json",
   );
   await write(
-    path.join(targetDist, "page_data", "meta.json"),
+    path.join(baseWritePath, "page_data", "meta.json"),
     JSON.stringify(staticMeta),
     "application/json",
   );
 
   //? route registry, maps route path to json file identifier name.
   await write(
-    path.join(targetDist, "page_data", "registry.json"),
+    path.join(baseWritePath, "page_data", "registry.json"),
     JSON.stringify(
       routes.map((r) => ({ path: r.path, identifier: r.identifier })),
     ),
@@ -178,7 +189,7 @@ export async function buildSite(
   );
 
   await write(
-    path.join(targetDist, "page_data", "search_index.json"),
+    path.join(baseWritePath, "page_data", "search_index.json"),
     JSON.stringify(searchIndex),
     "application/json",
   );
@@ -188,7 +199,7 @@ export async function buildSite(
     writePromises.push(
       write(
         path.join(
-          targetDist,
+          baseWritePath,
           "page_data",
           "routes",
           `${route.identifier}.json`,
@@ -201,8 +212,8 @@ export async function buildSite(
 
   writePromises.push(
     write(
-      path.join(targetDist, "index.html"),
-      await generateHtml(targetDist),
+      path.join(baseWritePath, "index.html"),
+      await generateHtml(baseWritePath),
       "text/html",
     ),
   );
@@ -216,12 +227,13 @@ export async function buildSite(
 
   logger.log("\nParsed MDs");
 
-  await buildDistRoutesFromRouteTree(
+  await buildDistRoutesFromRouteTree({
     routeTree,
     groupedRoutes,
-    targetDist,
+    distPath: targetDist,
     write,
-  );
+    baseRoute: state.finalConfig.baseRoute || "/",
+  });
 
   return Promise.resolve(true);
 }

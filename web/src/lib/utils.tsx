@@ -7,6 +7,20 @@ export function cn(...inputs: Array<ClassValue>) {
   return twMerge(clsx(inputs));
 }
 
+export function getIdentifier(
+  registry: Record<string, string>,
+  pathname: string
+): string | undefined {
+  return (
+    registry[pathname] ||
+    registry[
+      pathname.endsWith('/')
+        ? pathname.slice(0, pathname.length - 1)
+        : pathname + '/'
+    ]
+  );
+}
+
 export function extractText(
   html: string
 ): { targetElement: HTMLElement; text: string }[] {

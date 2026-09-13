@@ -1,3 +1,7 @@
 {
-  "STATIC_TEMP_CONTENT_PREFIX": "__smm_static_temp_content__"
+  "STATIC_TEMP_CONTENT_PREFIX": "__smm_static_temp_content__",
+  "DataAttributes": {
+    "DATA_INVALID_SOURCE": "data-invalid-source",
+    "DATA_INVALID_REFERENCE": "data-invalid-reference"
+  }
 }

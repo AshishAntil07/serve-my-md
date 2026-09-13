@@ -94,7 +94,7 @@ export function slugify(filepath: string) {
       if (c === " " || c === "_") return "-";
       return c;
     })
-    .join("");
+    .join("").replaceAll("%20", "-");
 }
 
 export function slugifyText(text: string) {
@@ -159,9 +159,12 @@ export function makeRoutesOfNestedPathsRaw(
   }, [] as string[]);
 }
 
-export function cacheBoundary<T, U>(callback: (state: T | null, param: U) => void) {
+export function cacheBoundary<T, U>(factory: (param: U) => T) {
   let state: T | null = null;
-  return (param: U) => callback(state, param);
+  return (param: U) => {
+    if (state) return state;
+    else return state = factory(param);
+  };
 }
 
 export function ogToHtml(og: OpenGraph): string {
